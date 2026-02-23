@@ -1,0 +1,36 @@
+{
+  "agents": {
+    "richard": {
+      "persistent_name": "Richard",
+      "universe": "Silicon Valley",
+      "role": "Lead",
+      "created_at": "2026-02-23T10:14:04Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "dinesh": {
+      "persistent_name": "Dinesh",
+      "universe": "Silicon Valley",
+      "role": "Frontend Dev",
+      "created_at": "2026-02-23T10:14:04Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "gilfoyle": {
+      "persistent_name": "Gilfoyle",
+      "universe": "Silicon Valley",
+      "role": "Backend Dev",
+      "created_at": "2026-02-23T10:14:04Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "jared": {
+      "persistent_name": "Jared",
+      "universe": "Silicon Valley",
+      "role": "Tester",
+      "created_at": "2026-02-23T10:14:04Z",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}
