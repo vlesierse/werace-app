@@ -16,6 +16,7 @@
 | Dinesh | Frontend Dev | `.squad/agents/dinesh/charter.md` | ✅ Active |
 | Gilfoyle | Backend Dev | `.squad/agents/gilfoyle/charter.md` | ✅ Active |
 | Jared | Tester | `.squad/agents/jared/charter.md` | ✅ Active |
+| Monica | Product Owner | `.squad/agents/monica/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.squad/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 

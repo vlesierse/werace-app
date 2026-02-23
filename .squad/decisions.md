@@ -78,3 +78,88 @@ Where to source lap-by-lap telemetry for P1 features
 **4. Monetization Model**  
 Free with ads, freemium, or paid upfront  
 *Recommendation:* Freemium (free historical data + basic AI, premium telemetry for $2.99/month) balances accessibility with revenue
+
+## PRD Review Findings (2026-02-23)
+
+### PRD Review Completed by Monica (Product Owner)
+
+**What:** Comprehensive review of `docs/PRD.md` v1.0 produced `docs/PRD-REVIEW.md` with 36 stakeholder questions, 8 flagged vague requirements, and 10 recommendations.
+
+**Status:** 🟡 PRD requires stakeholder clarification before development can begin
+
+### Critical Blockers (Must Resolve Before Development Starts)
+
+**Q25 — Authentication Model**
+- **Issue:** No authentication, accounts, or user identity system specified
+- **Impact:** Blocks rate limiting on AI queries, conversation persistence, feature gating for monetization
+- **Decision Needed:** Will the app be anonymous or require login? If login: email, social, Apple Sign-In?
+
+**Q12 — Data Source (Ergast API Deprecated)**
+- **Issue:** Primary data source listed is Ergast API, which was shut down in 2024
+- **Impact:** Cannot proceed with data pipeline design until actual data source is confirmed
+- **Decision Needed:** Are we using static Ergast dump, alternative API, direct FOM partnership, or hybrid?
+
+**Q18 — AI Safety Rails**
+- **Issue:** AI agent uses "LLM to generate SQL queries from natural language" with no security guardrails specified
+- **Impact:** SQL injection risk from untrusted user input; rate limiting undefined; no query allowlist
+- **Decision Needed:** How is SQL generation validated? Is LLM limited to read-only? Query allowlist required?
+
+**Q1 — MVP Scope Assessment**
+- **Issue:** MVP includes three major features: historical data browsing, AI Q&A, and core mobile navigation
+- **Risk:** May be too ambitious for a first release; high rework risk if scope is overscoped
+- **Recommendation:** Ship MVP-lite with data browsing + navigation, add AI agent as fast-follow
+
+### Additional Priority Questions
+
+**Data Model Gaps:**
+- Q3: Sprint races and Sprint Shootouts (2021+) not in data model
+- Q4: Qualifying results not modeled (stored in Result table with flag, or separate entity?)
+- Q5: Pit stop data not modeled (in scope for MVP?)
+
+**User Experience:**
+- Q7: Empty/error state definitions missing (no internet, no data, race not happened, off-season)
+- Q9: Off-season Home Screen design missing (what shows when no upcoming race?)
+- Q10: Pagination strategy undefined for lists (800+ drivers, 1000+ races)
+
+**Non-Functional Requirements:**
+- Q25: Accessibility WCAG conformance level not specified (WCAG 2.1 AA is mobile standard)
+- Q26: iOS/Android version targets not specified (affects library compatibility)
+- Q30: Concurrent user targets missing (affects infrastructure decisions for AI agent)
+
+**Business & Legal:**
+- Q33: "WeRace" trademark clearance not confirmed
+- Q35: Privacy policy missing (App Store requirement, affects data retention)
+- Q36: App store category/ratings not finalized
+
+### Vague Requirements Flagged (8)
+
+| Requirement | Issue | What's Needed |
+|---|---|---|
+| "Smooth scrolling" | Not measurable | Frame rate target (60fps?) |
+| "Instant feedback" | Not measurable | Millisecond threshold (< 100ms?) |
+| "High contrast ratios" | Not specific | WCAG AA min (4.5:1 text, 3:1 large) |
+| "Scalable fonts" | Not specific | Dynamic type support definition |
+| "Speed" (design principle) | Entire principle vague | FCP, TTI, navigation time targets |
+| "Comprehensive database" | Undefined | Season coverage, minimum data per race |
+| "Understandable telemetry" | Vague | Target user F1 knowledge level |
+| "Concise answers" | No spec | Max words? Sentence? Paragraph? |
+
+### 10 Recommendations (Prioritized)
+
+**Before Development (4 items):**
+1. Resolve authentication model (Q25) → architectural foundation
+2. Confirm data source (Q12) → can't design pipeline without it
+3. Define AI safety rails (Q18, Q20, Q22) → security + cost control required
+4. Scope MVP tighter (Q1) → reduce delivery risk with phased approach
+
+**Before Design (3 items):**
+5. Define empty/error states (Q7, Q9, Q29) → every screen needs these UX decisions
+6. Resolve content dependencies (Q11, Q17) → circuit images, driver photos sourcing
+7. Clarify pagination (Q10) → affects every list view in the app
+
+**Before Beta (3 items):**
+8. Legal review (Q33, Q35, Q36) → trademark, privacy, licensing are launch blockers
+9. Analytics instrumentation (Q34) → can't measure success metrics without it
+10. Accessibility conformance (Q27) → WCAG 2.1 AA is standard for mobile apps
+
+**Action:** Vincent must respond to all 36 questions in `docs/PRD-REVIEW.md` (numbered for easy reference). Critical path: Q1, Q12, Q18, Q25.

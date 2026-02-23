@@ -20,3 +20,30 @@
 - **Open Questions:** Data licensing (Ergast/OpenF1 rights), AI backend choice (Azure vs self-hosted), telemetry data sources, monetization model
 - **User Personas:** The Historian (casual fan, trivia), The Analyst (data enthusiast, telemetry), The Weekend Warrior (race weekend companion)
 - **Key File Paths:** `/docs/PRD.md`
+
+### 2026-02-23: PRD Review Complete — Development Blocked on Critical Decisions
+
+**Status:** 🟡 Monica (Product Owner) completed PRD review; 36 questions raised; 4 critical blockers identified
+
+**Your Role:** As Lead, you need to help Vincent prioritize answers to critical questions (Q1, Q12, Q18, Q25) before development can start.
+
+**Critical Blockers (Must Resolve Before Dev):**
+1. **Q25 — Authentication:** No auth model specified; blocks rate limiting, conversation persistence, monetization architecture
+2. **Q12 — Data Source:** Ergast API is deprecated (shut down 2024); need confirmed replacement (static dump? Alternative API? FOM partnership?)
+3. **Q18 — AI Security:** LLM-generated SQL without guardrails = SQL injection risk; need query validation, allowlist, read-only enforcement
+4. **Q1 — MVP Scope:** Three major features (data browsing + AI agent + core nav) may be too ambitious; recommend phasing to reduce risk
+
+**Data Model Gaps (Need Decision):**
+- Qualifying results: stored in Result with flag, or separate entity?
+- Sprint races/Sprint Shootouts (2021+): in scope?
+- Pit stop data: in scope for MVP?
+- Search: feature exists but no API endpoint defined
+
+**Architecture Impact:**
+- Cannot finalize database schema until Q3, Q4, Q5 (qualifying, sprint, pit stops) are answered
+- Cannot design API contracts without clarity on Q2 (search architecture)
+- AI agent cannot move forward without Q18 (SQL injection guardrails), Q20 (rate limiting), Q22 (content boundaries)
+
+**Full Details:** See `docs/PRD-REVIEW.md` (36 questions, 8 vague requirements, 10 recommendations) and `.squad/decisions.md` (merged findings)
+
+**Session Log:** `.squad/log/2026-02-23-prd-review.md` — full context of PRD review outcome

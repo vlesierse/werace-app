@@ -10,6 +10,7 @@ How to decide who handles what.
 | React Native UI | Dinesh | Screens, components, navigation, design system, animations |
 | .NET API & backend | Gilfoyle | Minimal API endpoints, database, Aspire setup, AI agent integration |
 | Testing & quality | Jared | Unit tests, integration tests, edge cases, test infrastructure |
+| Requirements & functional design | Monica | User stories, acceptance criteria, stakeholder Q&A, feature specs |
 | Code review | Richard | Review PRs, check quality, suggest improvements |
 | F1 data & domain | Gilfoyle + Richard | Historical data ingestion, telemetry, race models |
 | AI agent features | Gilfoyle | LLM integration, prompt engineering, response formatting |
@@ -27,6 +28,7 @@ How to decide who handles what.
 | `squad:dinesh` | Frontend, UI, React Native tasks | Dinesh |
 | `squad:gilfoyle` | Backend, API, database, AI tasks | Gilfoyle |
 | `squad:jared` | Testing, QA, quality tasks | Jared |
+| `squad:monica` | Requirements, functional design, stakeholder tasks | Monica |
 
 ## Rules
 
