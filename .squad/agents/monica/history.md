@@ -18,3 +18,13 @@
 - **Missing data model entities:** Qualifying results, Sprint races, PitStop data — all referenced in features but absent from schema
 - **Owner preference:** Vincent named the product "WeRace" — trademark clearance flagged as open question
 - **Team decisions to respect:** PostgreSQL (relational fit), React Native Paper (MD3), REST over GraphQL, RAG with SQL generation for AI agent
+
+### 2026-02-23 — Q25 Authentication Resolved
+
+- **Question:** Q25 (Authentication Model) — the #1 priority blocker from PRD review
+- **Vincent's answer:** .NET Identity, email/password + passkeys, anonymous browsing allowed, auth required for AI agent and telemetry
+- **PRD updated:** Added "Authentication & Authorization" section between Technical Architecture and Data Model
+- **API Surface updated:** All endpoint groups now marked with 🔓 (public) or 🔐 (authenticated). AI and Telemetry endpoints require auth.
+- **AI Agent section updated:** Added login-required notice at top of specification
+- **Follow-up questions filed:** 7 sub-questions in `.squad/decisions/inbox/monica-auth-followups.md` — most critical are Apple Sign-In requirement (F1), anonymous→auth UX flow (F3), and passkey feasibility in React Native (F4)
+- **Remaining critical blockers:** Q12 (data source), Q18 (AI safety rails), Q1 (MVP scope) still unresolved

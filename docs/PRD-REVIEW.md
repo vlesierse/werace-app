@@ -79,7 +79,11 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 ### Non-Functional Requirements
 
-**Q25.** **Is there user authentication?** The entire PRD has no mention of login, accounts, or user identity. If it's anonymous: how do we track AI usage, enforce rate limits, store conversation history, or gate premium features (monetization)? If it has auth: which provider? Email? Social login? Apple Sign-In (required by iOS)?
+**Q25.** ✅ **RESOLVED** — **Is there user authentication?** The entire PRD has no mention of login, accounts, or user identity. If it's anonymous: how do we track AI usage, enforce rate limits, store conversation history, or gate premium features (monetization)? If it has auth: which provider? Email? Social login? Apple Sign-In (required by iOS)?
+
+> **Vincent's Answer (2026-02-23):** "We use a simple authentication mechanism for users using .NET Identity with the option to use name/email + password and/or use passkeys. However logging in is optional for browsing the races, getting basic (cached) information. When the user wants telemetry or using the AI agent, logging in is required."
+>
+> **Resolution:** Auth provider is .NET Identity. Two login methods: email/password and passkeys. Anonymous access allowed for race browsing and cached historical data. Authenticated access required for telemetry data and AI agent. This resolves the core auth question but opens sub-questions — see `docs/PRD.md` Authentication & Authorization section and `.squad/decisions/inbox/monica-auth-followups.md`.
 
 **Q26.** **What iOS and Android versions are supported?** React Native version determines this. Minimum iOS 15? Android API 26? This affects UI capabilities and library compatibility.
 
@@ -126,7 +130,7 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 ### Before Development Starts
 
-1. **Resolve authentication model (Q25)** — This is the single biggest architectural gap. Every feature involving persistence, rate limiting, or monetization depends on it.
+1. ✅ **~~Resolve authentication model (Q25)~~** — RESOLVED. .NET Identity with email/password + passkeys. Anonymous browsing allowed; auth required for telemetry and AI agent. See PRD § Authentication & Authorization.
 
 2. **Confirm data source (Q12)** — The Ergast API is deprecated. We need to know exactly where historical data comes from and how it gets into PostgreSQL.
 

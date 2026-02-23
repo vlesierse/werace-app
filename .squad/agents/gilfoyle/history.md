@@ -45,9 +45,43 @@
 **Accessibility & Performance (Q31):**
 - P95 latency target is < 300ms; does this include database query time? What about Azure Container Apps cold starts? P99 target?
 
-**You Can Start:**
-- Setting up PostgreSQL schema with Season, Race, Circuit, Driver, Constructor, Result, LapTime, DriverStanding, ConstructorStanding entities
-- Designing Minimal API endpoint structure and request/response contracts
-- Planning ETL pipeline (awaiting data source confirmation)
+### 2026-02-23: Authentication Model Resolved — Backend & Feature Gating Implications
+
+**Decision:** Auth uses .NET Identity with email/password + passkeys. Anonymous browsing allowed; login required for AI agent and telemetry.
+
+**What This Means for You:**
+
+1. **User Model in Database:** You need to design your User entity to link:
+   - Authentication records (handled by .NET Identity)
+   - Conversation history (for AI agent persistence)
+   - User preferences (dark/light mode, favorites in P2)
+   - Usage tracking (for rate limiting and cost control per F7)
+
+2. **API Endpoints That Gate Features:**
+   - GET /races, /seasons, /drivers (public, no auth required)
+   - GET /telemetry/... (auth required, 403 if not logged in)
+   - POST /ai/chat (auth required, return 401 if not authenticated)
+   - Add `[Authorize]` attributes to protected endpoints in Minimal API
+
+3. **Rate Limiting Strategy (F2):** For now, focus on:
+   - Authenticated rate limits per user (e.g., 100 AI queries/day per user)
+   - Anonymous rate limits per IP address (e.g., 10 requests/min per IP)
+   - Use middleware or API Gateway for IP-based rate limiting; database for per-user limits
+
+4. **Session Management (F5):** Decide:
+   - How long do auth tokens last? (recommend 7–30 days for mobile UX)
+   - Refresh token strategy for background token renewal without user re-login
+   - This affects both .NET Identity configuration and frontend auth handling
+
+5. **Follow-Up Questions for Vincent (F1, F3, F4, F6, F7):**
+   - F1: Apple Sign-In requirement for App Store
+   - F3: UX flow when anonymous user hits login wall (modal overlay vs. dedicated screen)
+   - F4: Passkey feasibility in React Native (iOS/Android native APIs)
+   - F6: Do we need a User entity in our relational model?
+   - F7: Final rate limits and token budgets per user
+
+**You Don't Need Answers to Start:** You can begin schema design with placeholder User/Auth tables; Vincent will clarify F1–F7 before you implement the actual endpoints.
+
+
 
 **Full Details:** See `docs/PRD-REVIEW.md` (36 questions with full context) and `.squad/decisions.md` (merged PRD review findings)

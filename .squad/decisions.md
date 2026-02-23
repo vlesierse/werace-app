@@ -89,10 +89,22 @@ Free with ads, freemium, or paid upfront
 
 ### Critical Blockers (Must Resolve Before Development Starts)
 
-**Q25 — Authentication Model**
-- **Issue:** No authentication, accounts, or user identity system specified
-- **Impact:** Blocks rate limiting on AI queries, conversation persistence, feature gating for monetization
-- **Decision Needed:** Will the app be anonymous or require login? If login: email, social, Apple Sign-In?
+**Q25 — Authentication Model** ✅ RESOLVED
+- **Resolution:** .NET Identity with two authentication options:
+  - **Email/Password:** Standard forms-based authentication
+  - **Passkeys:** FIDO2/WebAuthn support for passwordless access
+  - **Anonymous Access:** Allowed for browsing races and cached historical data
+  - **Authenticated Features:** AI agent queries and telemetry data access require login
+- **Impact:** Unblocks rate limiting, conversation persistence, feature gating, and monetization architecture.
+- **Documented in:** `docs/PRD.md` § Authentication & Authorization
+- **Follow-up Items Requiring Stakeholder Input:**
+  - **F1 — Apple Sign-In Requirement:** Do we need Apple Sign-In as third option for App Store compliance?
+  - **F2 — Anonymous Rate Limiting:** Need IP-based or device-fingerprint rate limiting strategy for anonymous users
+  - **F3 — Login UX Flow:** Define transition UX when anonymous user accesses gated features (modal vs. redirect)
+  - **F4 — Passkey Mobile Implementation:** Assess feasibility of FIDO2/WebAuthn in React Native (iOS Passkeys API, Android Credential Manager)
+  - **F5 — Session Duration:** Define token lifetime and refresh strategy for mobile UX (indefinite vs. inactivity expiry)
+  - **F6 — User Data Model:** Do we need custom User entity to link conversations, favorites, and usage tracking?
+  - **F7 — AI Rate Limits:** Define per-user daily/hourly query limits and token budgets for cost control
 
 **Q12 — Data Source (Ergast API Deprecated)**
 - **Issue:** Primary data source listed is Ergast API, which was shut down in 2024

@@ -163,6 +163,43 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 
 ---
 
+## Authentication & Authorization
+
+### Auth Provider
+**.NET Identity** — integrated into the .NET 10 Minimal API backend. Provides user registration, login, session management, and role-based access control.
+
+### Login Methods
+- **Email/Password:** Standard registration and login with name, email, and password
+- **Passkeys:** WebAuthn/FIDO2 passkey support for passwordless authentication
+
+### Access Tiers
+
+| Access Level | Features | Auth Required? |
+|---|---|---|
+| **Anonymous** | Race browsing, historical results, standings, driver/team profiles, circuit info, cached data | No |
+| **Authenticated** | Telemetry data exploration, AI agent Q&A, conversation history, personalization (P2) | Yes |
+
+### Anonymous Access (No Login Required)
+- Browse seasons, races, results, standings, driver/team profiles, circuits
+- Access cached and historical data
+- Full use of core mobile navigation, search, dark/light mode
+- Race weekend schedule viewing (P1)
+
+### Authenticated Access (Login Required)
+- **AI Agent:** All `/ai/*` endpoints require authentication (needed for rate limiting, conversation persistence, cost tracking)
+- **Telemetry:** All `/telemetry/*` endpoints require authentication
+- **Conversation History:** Stored per-user, requires login to persist and retrieve
+- **Personalization (P2):** Favorites, bookmarks, watch history tied to user account
+
+### Implications for Other Features
+- **API Endpoints:** Public data endpoints (seasons, races, results, drivers, constructors, circuits) serve anonymous requests. AI and telemetry endpoints return `401 Unauthorized` without a valid session.
+- **AI Agent:** Login prompt must be shown before first AI query if user is unauthenticated. Rate limiting is per-user (not per-device).
+- **Monetization (Future):** User accounts are now available for feature gating if freemium model is adopted.
+- **Privacy:** .NET Identity stores PII (email, name). Privacy policy must cover data retention, deletion rights (GDPR/CCPA). See Q35.
+- **Mobile UX:** App must gracefully handle the anonymous → authenticated transition (e.g., user browses anonymously, taps "Ask AI", gets login prompt, returns to AI after auth).
+
+---
+
 ## Data Model
 
 ### Core Entities
@@ -273,12 +310,14 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 
 ### Endpoint Groups
 
-#### Seasons
+> **Auth Legend:** 🔓 = Public (anonymous access) | 🔐 = Authenticated required
+
+#### Seasons 🔓
 - `GET /seasons` — List all seasons (with optional filters: `?from=1990&to=2000`)
 - `GET /seasons/{year}` — Season details with race calendar
 - `GET /seasons/{year}/standings` — Final standings (drivers + constructors)
 
-#### Races
+#### Races 🔓
 - `GET /races` — List races (filterable: `?season=2023`, `?circuit_id=1`)
 - `GET /races/{race_id}` — Race details (circuit, date, session times)
 - `GET /races/{race_id}/results` — Finishing order with lap times
@@ -286,41 +325,43 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 - `GET /races/{race_id}/standings` — Standings after this race
 - `GET /races/{race_id}/laps` — Lap-by-lap times (optional `?driver_id=X`)
 
-#### Drivers
+#### Drivers 🔓
 - `GET /drivers` — List all drivers (paginated)
 - `GET /drivers/{driver_id}` — Driver profile
 - `GET /drivers/{driver_id}/career` — Career stats summary (wins, poles, championships)
 - `GET /drivers/{driver_id}/results` — Race results history
 
-#### Constructors
+#### Constructors 🔓
 - `GET /constructors` — List all teams
 - `GET /constructors/{constructor_id}` — Team profile
 - `GET /constructors/{constructor_id}/career` — Career stats
 - `GET /constructors/{constructor_id}/results` — Race results history
 
-#### Circuits
+#### Circuits 🔓
 - `GET /circuits` — List all circuits
 - `GET /circuits/{circuit_id}` — Circuit details (location, map)
 - `GET /circuits/{circuit_id}/races` — All races held at this circuit
 
-#### Telemetry (P1)
+#### Telemetry (P1) 🔐
 - `GET /telemetry/race/{race_id}/driver/{driver_id}/lap/{lap}` — Full telemetry for one lap
 - `GET /telemetry/race/{race_id}/driver/{driver_id}/fastest-lap` — Telemetry for fastest lap
 - `GET /telemetry/compare` — Compare two drivers' laps (query params: `race_id`, `driver1_id`, `driver2_id`, `lap1`, `lap2`)
 
-#### AI Agent
-- `POST /ai/query` — Submit natural language question
-  - **Request:** `{ "query": "Who won the 2020 Turkish GP?", "conversation_id": "uuid" }`
+#### AI Agent 🔐
+- `POST /ai/query` — Submit natural language question *(requires authenticated user for rate limiting and conversation persistence)*
+  - **Request:** `{ "query": "Who won the 2020 Turkish GP?", "conversation_id": "uuid" }` *(Bearer token required)*
   - **Response:** `{ "answer": "Lewis Hamilton won...", "sources": [...]", "conversation_id": "uuid" }`
-- `GET /ai/conversations/{conversation_id}` — Retrieve conversation history
+- `GET /ai/conversations/{conversation_id}` — Retrieve conversation history *(user can only access own conversations)*
 
-#### Race Weekend (P1)
+#### Race Weekend (P1) 🔓
 - `GET /live/current` — Current or next race weekend details
 - `GET /live/schedule` — Upcoming race weekend schedule (P/Q/R times)
 
 ---
 
 ## AI Agent Specification
+
+> **⚠️ Login Required:** The AI agent is only available to authenticated users. Unauthenticated users who tap "Ask AI" must be prompted to log in first. This enables per-user rate limiting, conversation persistence, and cost tracking.
 
 ### Capabilities
 The AI agent answers natural language questions about F1 using a retrieval-augmented generation (RAG) approach:
@@ -395,7 +436,7 @@ The AI agent answers natural language questions about F1 using a retrieval-augme
 - **System Aware:** Automatically switch based on device settings
 
 ### Key Screens
-1. **Home:** Upcoming race card, "Ask AI" search bar, recent races list
+1. **Home:** Upcoming race card, "Ask AI" search bar *(prompts login if unauthenticated)*, recent races list
 2. **Season Browser:** Grid or list of seasons, filterable by decade
 3. **Race Details:** Hero image (circuit), session times, results tabs (Race/Qualifying/Practice)
 4. **Driver Profile:** Photo, career stats cards, results timeline
