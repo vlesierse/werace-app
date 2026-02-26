@@ -49,7 +49,11 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 ### Data & Content
 
-**Q12.** The Ergast API, listed as the primary data source, has been deprecated and was shut down in 2024. **What is the actual data source for historical F1 data now?** Is there a replacement API, or are we working from a static dataset (the Ergast database dump)?
+**Q12.** ✅ **RESOLVED** — The Ergast API, listed as the primary data source, has been deprecated and was shut down in 2024. **What is the actual data source for historical F1 data now?** Is there a replacement API, or are we working from a static dataset (the Ergast database dump)?
+
+> **Vincent's Answer (2026-02-26):** "Ergast is deprecated. However Jolpica is a project which builds upon Ergast and provides a compatible API. They expose the database as dump files which we would be able to import."
+>
+> **Resolution:** Jolpica API (Ergast-compatible) replaces Ergast as primary historical data source. Database dump files are available for direct PostgreSQL import, which simplifies the data pipeline (dump import rather than API scraping). This resolves the data source question but opens sub-questions — see `.squad/decisions/inbox/monica-data-source-followups.md`.
 
 **Q13.** **How is the database initially seeded?** The Data Pipeline Spec is listed as TBD. We need to know: is this a one-time import, a scheduled sync, or manual data entry? This affects MVP delivery timeline.
 
@@ -132,7 +136,7 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 1. ✅ **~~Resolve authentication model (Q25)~~** — RESOLVED. .NET Identity with email/password + passkeys. Anonymous browsing allowed; auth required for telemetry and AI agent. See PRD § Authentication & Authorization.
 
-2. **Confirm data source (Q12)** — The Ergast API is deprecated. We need to know exactly where historical data comes from and how it gets into PostgreSQL.
+2. ✅ **~~Confirm data source (Q12)~~** — RESOLVED. Jolpica API (Ergast-compatible) replaces Ergast as primary historical data source. Database dump files available for direct PostgreSQL import. See `.squad/decisions/inbox/monica-data-source-followups.md` for follow-up questions.
 
 3. **Define AI safety rails (Q18, Q20, Q22)** — SQL generation from untrusted user input is a security risk. Rate limiting, query validation, and content boundaries must be specified before development.
 

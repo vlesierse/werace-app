@@ -106,10 +106,36 @@ Free with ads, freemium, or paid upfront
   - **F6 — User Data Model:** Do we need custom User entity to link conversations, favorites, and usage tracking?
   - **F7 — AI Rate Limits:** Define per-user daily/hourly query limits and token budgets for cost control
 
-**Q12 — Data Source (Ergast API Deprecated)**
-- **Issue:** Primary data source listed is Ergast API, which was shut down in 2024
-- **Impact:** Cannot proceed with data pipeline design until actual data source is confirmed
-- **Decision Needed:** Are we using static Ergast dump, alternative API, direct FOM partnership, or hybrid?
+**Q12 — Data Source (Ergast API Deprecated)** ✅ RESOLVED
+- **Resolution:** Jolpica API (Ergast-compatible) replaces Ergast as primary historical data source.
+  - **Jolpica API:** Drop-in replacement for deprecated Ergast API, compatible interface
+  - **Database Dumps:** Jolpica exposes database dump files for direct PostgreSQL import
+  - **Pipeline Approach:** Bulk import from dump files rather than incremental API scraping
+- **Impact:** Unblocks data pipeline design. Simplifies initial data seeding (dump import vs. ETL).
+- **Documented in:** `docs/PRD.md` § Data Sources
+- **Follow-up Items Requiring Stakeholder Input:**
+  - **F1 — Data Freshness:** What is Jolpica's update frequency? How quickly are new race results available in dump files vs. API?
+  - **F2 — Dump Format Compatibility:** What format are the dump files (SQL, CSV, custom)? Do they map directly to our PostgreSQL schema or require transformation?
+  - **F3 — Data Completeness:** Does Jolpica cover the same data range as original Ergast (1950–2024)? Any gaps or additions?
+  - **F4 — Licensing Terms:** What are Jolpica's licensing terms for commercial use? Any attribution or usage restrictions?
+  - **F5 — Sync Strategy:** One-time dump import + delta updates via API, or periodic full re-import? What triggers a sync?
+  - **F6 — 2025+ Data:** Does Jolpica cover current/future seasons, or do we need OpenF1 for recent data and Jolpica for historical only?
+
+### Open Follow-Ups: Data Source (Q12) — Filed 2026-02-26
+
+**By:** Monica (Product Owner)
+**Context:** Vincent confirmed Jolpica API as replacement for Ergast. These sub-questions require further stakeholder input before data pipeline design can proceed.
+
+| ID | Question | Priority |
+|----|----------|----------|
+| F1 | **Data Freshness:** How frequently does Jolpica update? How quickly after a race are results in API vs. dump files? | Medium |
+| F2 | **Dump Format Compatibility:** What format are Jolpica dump files (SQL, CSV, MySQL)? Direct PostgreSQL mapping or transformation needed? | High |
+| F3 | **Data Completeness:** Does Jolpica cover full 1950–present range? Any gaps vs. original Ergast? | Medium |
+| F4 | **Licensing Terms:** Commercial use permitted? Attribution or rate limit restrictions? | High |
+| F5 | **Sync Strategy:** One-time dump + API deltas, or periodic full re-import? Affects pipeline architecture. | High |
+| F6 | **2025+ Coverage:** Does Jolpica cover current/future seasons or only historical? Do we need OpenF1 for recent data? | Medium |
+
+**Action:** Vincent to confirm F1–F6. Most critical for pipeline: F2, F5. Most critical for legal: F4.
 
 **Q18 — AI Safety Rails**
 - **Issue:** AI agent uses "LLM to generate SQL queries from natural language" with no security guardrails specified

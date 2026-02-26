@@ -49,6 +49,22 @@
 
 **Decision:** Auth uses .NET Identity with email/password + passkeys. Anonymous browsing allowed; login required for AI agent and telemetry.
 
+### 2026-02-26: Data Source Resolved — Jolpica Replaces Ergast (cross-agent)
+
+**Decision:** Jolpica API confirmed as primary historical F1 data source, replacing the deprecated Ergast API.
+
+**What This Means for You:**
+
+1. **Data Pipeline Target:** Design your data seeding pipeline around Jolpica database dump files for initial PostgreSQL import (bulk import, not incremental API scraping).
+2. **API Compatibility:** Jolpica's API is Ergast-compatible — any existing Ergast client code or schema references carry over.
+3. **Dump Import:** Jolpica exposes dump files for direct database import. Format TBD (follow-up F2 pending from Vincent). May require transformation if dump is MySQL format.
+4. **Sync Strategy TBD:** One-time dump + API deltas vs. periodic re-import not yet decided (follow-up F5 pending). Design pipeline with pluggable sync approach.
+5. **2025+ Data:** Unknown whether Jolpica covers current seasons (follow-up F6 pending). May need OpenF1 as secondary source for live/recent data.
+
+**Remaining Blockers for You:** Q18 (AI safety rails) still unresolved — do not implement SQL generation from LLM without guardrails.
+
+**Full Details:** See `.squad/decisions.md` and `docs/PRD.md` § Data Sources.
+
 **What This Means for You:**
 
 1. **User Model in Database:** You need to design your User entity to link:

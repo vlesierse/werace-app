@@ -297,9 +297,11 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 - `wins` (int)
 
 ### Data Sources
-- **Ergast API** (historical data up to ~2024)
+- **Jolpica API** (Ergast-compatible replacement for historical data; database dump files available for direct PostgreSQL import)
 - **OpenF1 API** (recent telemetry, live timing)
 - **Manual curation** for missing data or corrections
+
+> **Note:** The original Ergast API was deprecated and shut down in 2024. Jolpica builds upon the Ergast project with a compatible API and provides database dump files, enabling bulk import into PostgreSQL rather than incremental API scraping.
 
 ---
 
@@ -483,8 +485,8 @@ The AI agent answers natural language questions about F1 using a retrieval-augme
 ## Open Questions
 
 ### 1. Data Licensing & Sources
-- **Q:** Do we have rights to use Ergast/OpenF1 APIs in a commercial app?
-- **A:** Need legal review; may require direct licensing from FOM (Formula One Management)
+- **Q:** Do we have rights to use Jolpica/OpenF1 APIs and database dumps in a commercial app?
+- **A:** Need legal review; Jolpica data licensing terms must be confirmed. May require direct licensing from FOM (Formula One Management) for certain data.
 - **Decision Needed By:** Before public beta
 
 ### 2. AI Backend Provider
@@ -535,7 +537,7 @@ The AI agent answers natural language questions about F1 using a retrieval-augme
 - **Technical Design Doc:** (TBD — detailed API specs, database schema DDL)
 - **AI Agent Design Doc:** (TBD — RAG architecture, prompt engineering, evaluation)
 - **Mobile Design Mockups:** (TBD — Figma files)
-- **Data Pipeline Spec:** (TBD — ETL from Ergast/OpenF1 to PostgreSQL)
+- **Data Pipeline Spec:** (TBD — Jolpica database dump import to PostgreSQL, delta sync strategy from Jolpica API/OpenF1)
 
 ---
 

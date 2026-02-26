@@ -47,3 +47,13 @@
 **Full Details:** See `docs/PRD-REVIEW.md` (36 questions, 8 vague requirements, 10 recommendations) and `.squad/decisions.md` (merged findings)
 
 **Session Log:** `.squad/log/2026-02-23-prd-review.md` — full context of PRD review outcome
+
+### 2026-02-26: Q12 Data Source Resolved — Jolpica Replaces Ergast (cross-agent)
+
+**Status update:** 2 of 4 critical blockers now resolved (Q25 Authentication, Q12 Data Source). Remaining: Q18 (AI safety rails), Q1 (MVP scope).
+
+**Q12 Resolution:** Jolpica API confirmed as drop-in Ergast replacement. Provides Ergast-compatible API + database dump files for direct PostgreSQL import. Pipeline approach is bulk dump import rather than incremental scraping.
+
+**6 follow-up questions filed** (F1–F6) covering dump format, sync strategy, licensing, data freshness, completeness, and 2025+ coverage. See `.squad/decisions.md` for details.
+
+**Next priority blockers:** Q18 (AI safety rails) and Q1 (MVP scope assessment).
