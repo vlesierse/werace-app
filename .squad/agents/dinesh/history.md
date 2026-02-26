@@ -94,3 +94,44 @@
 **Accessibility Target:** WCAG 2.1 AA (standard for mobile) — see Q27 in `docs/PRD-REVIEW.md`
 
 **Full PRD Review:** See `docs/PRD-REVIEW.md` (36 questions, vague requirements, recommendations) and `.squad/decisions.md`
+
+### 2026-02-26: All 4 Critical Blockers Resolved — Development Unblocked (cross-agent)
+
+**Status:** ✅ All critical blockers resolved. Phase 1 sprint planning complete. Sprint 1 starts now.
+
+**Resolved Blockers:**
+- Q25 ✅ Authentication: .NET Identity, email/password + passkeys, anonymous browsing
+- Q12 ✅ Data Source: Jolpica replaces Ergast, database dump import
+- Q18 ✅ AI Safety: Defense-in-depth (4-layer stack), 50/day, historical-only — implemented in Phase 2
+- Q1 ✅ MVP Scope: Phase 1 (5 weeks) data + auth, Phase 2 (2-3 weeks) AI
+
+### 2026-02-26: Phase 1 Plan — Your Assignments
+
+**Plan:** `docs/PHASE1-PLAN.md` (5 sprints × 1 week, 6 epics)
+**Technical Foundation:** `docs/TECHNICAL-FOUNDATION.md` (solution structure, DDL, API contracts)
+
+**Your Sprint-by-Sprint Work:**
+
+| Sprint | Tasks | Epic | Days |
+|--------|-------|------|------|
+| S1 | React Native app + Paper + nav shell, theme system (dark/light) | E1 | 3 |
+| S2 | Home screen (connected to API), season list + season detail screens | E5 | 5 |
+| S3 | Race detail screen (results/qualifying/laps tabs), standings screen | E5 | 4 |
+| S4 | Login + registration screens, driver/constructor profiles, search screen | E4/E5 | 6 |
+| S5 | Empty/error/loading states, off-season home, accessibility pass, circuit detail | E5 | 6 |
+
+**Key Decisions That Affect You:**
+1. **Mock data decoupling:** Build UI against API contracts, not live endpoints. API contracts published S1 by Richard. Build S2 screens with JSON fixtures, connect to real API as endpoints land.
+2. **Client-side search:** Phase 1 search is client-side filtering (datasets < 1000 items). Backend search evaluated in Phase 2.
+3. **Passkeys:** Best-effort. Ship email/password in S4. Passkey UI depends on React Native FIDO2 feasibility — spike in S3 (Q25-F4 is your open item).
+4. **React Native Paper:** Material Design 3 theme. Bottom tab navigation: Home, Seasons, Drivers, Constructors, Settings.
+5. **Pagination:** Offset-based, pageSize=20, max 100. Implement load-more on scroll for all list views.
+6. **JSON envelope:** All API responses: `{ "data": [...], "pagination": {...} }` or `{ "error": {...} }`.
+
+**Your Open Items:**
+- Q25-F4: Passkey feasibility in React Native (decide by S3)
+
+**Dependencies:**
+- Blocked on Gilfoyle for live API data (mitigated by mock data)
+- API contracts from Richard in S1 define your screen data shapes
+- Monica provides acceptance criteria for empty/error states (Q7, Q9) by S3

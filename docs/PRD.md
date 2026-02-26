@@ -60,57 +60,74 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 
 ### P0 — Must-Have (MVP)
 
-#### 1. Historical Race Data Browsing
+#### Phase 1 — MVP (4-6 weeks)
+
+##### 1. Historical Race Data Browsing
 - **Seasons List:** Browse F1 seasons from 1950 to present
 - **Race Calendar:** View race calendar for any season, with circuit info
 - **Race Results:** Detailed finishing order, lap times, fastest laps, pit stops
 - **Standings:** Driver and Constructor standings for any season
 - **Driver/Team Profiles:** Career stats, wins, poles, championships
 
-#### 2. AI-Powered Q&A Agent
-- **Natural Language Queries:** "Who won the 1998 Belgian GP?", "How many wins does Hamilton have at Silverstone?"
-- **Contextual Understanding:** Handle follow-up questions, time-based queries
-- **Data Sources:** Historical race results, driver stats, team info, telemetry summaries
-- **Response Format:** Concise text answers with data citations (e.g., "Lewis Hamilton: 8 wins at Silverstone (2008, 2014-2017, 2019-2021)")
-
-#### 3. Core Mobile Navigation
-- **Home Screen:** Quick access to upcoming race, recent races, AI agent
+##### 2. Core Mobile Navigation
+- **Home Screen:** Quick access to upcoming race, recent races
 - **Search:** Find races, drivers, teams by name or year
 - **Responsive Design:** Smooth scrolling, optimized for mobile screens
 - **Dark/Light Mode:** System-aware theme switching
 
+##### 3. Authentication
+- **.NET Identity:** Email/password + passkeys
+- **Anonymous Browsing:** Browse races and cached historical data without login
+- **Gated Features:** Login required for AI agent (Phase 2) and telemetry (P1)
+
+##### 4. AI Foundations (Phase 2 Prep)
+- **Read-Only DB Role:** `werace_ai_readonly` PostgreSQL role for AI queries
+- **Database Views:** Optimized views for common F1 query patterns
+- **Schema Documentation:** Data dictionary for LLM prompt context
+
+#### Phase 2 — AI Fast-Follow (2-3 weeks after Phase 1)
+
+##### 5. AI-Powered Q&A Agent
+- **Natural Language Queries:** "Who won the 1998 Belgian GP?", "How many wins does Hamilton have at Silverstone?"
+- **Contextual Understanding:** Handle follow-up questions, time-based queries
+- **Data Sources:** Historical race results, driver stats, team info
+- **Response Format:** Concise text answers with data citations (e.g., "Lewis Hamilton: 8 wins at Silverstone (2008, 2014-2017, 2019-2021)")
+- **Safety Architecture:** Defense-in-depth with 4 safety layers (see § AI Safety Architecture)
+- **Rate Limiting:** 50 queries/day per authenticated user
+- **Scope:** Historical F1 data only — no predictions, no personal data
+
 ### P1 — Should-Have (Post-MVP)
 
-#### 4. Race Weekend Companion
+#### 6. Race Weekend Companion
 - **Session Schedule:** Practice, Qualifying, Race times (user timezone)
 - **Live Session Status:** "Qualifying in progress", "Race starts in 2h"
 - **Session Results:** Immediate access to qualifying grid, practice times
 - **Push Notifications:** Opt-in reminders for sessions
 
-#### 5. Telemetry Data Exploration
+#### 7. Telemetry Data Exploration
 - **Lap-by-Lap Data:** Speed traces, throttle/brake inputs, gear shifts
 - **Comparative Views:** Overlay two drivers' laps
 - **Key Moments:** Pre-analyzed insights (e.g., "Verstappen lost 0.3s in Sector 2")
 - **Educational Context:** Explain telemetry metrics for casual fans
 
-#### 6. Enhanced AI Agent
+#### 8. Enhanced AI Agent
 - **Multi-Turn Conversations:** Maintain context across queries
 - **Telemetry Questions:** "Show me Hamilton's fastest lap from Monaco 2023"
 - **Comparison Queries:** "Compare Senna vs Prost qualifying records"
 
 ### P2 — Nice-to-Have (Future)
 
-#### 7. Personalization
+#### 9. Personalization
 - **Favorite Drivers/Teams:** Custom dashboard with favorite's stats
 - **Bookmarked Races:** Save memorable races for quick access
 - **Watch History:** Track what you've explored
 
-#### 8. Circuit Explorer
+#### 10. Circuit Explorer
 - **3D Circuit Maps:** Interactive track layouts
 - **Corner Analysis:** Historical data per corner (fastest speeds, common incidents)
 - **Track Evolution:** How circuits have changed over time
 
-#### 9. Offline Mode
+#### 11. Offline Mode
 - **Cached Data:** Download seasons for offline browsing
 - **AI Agent Cache:** Pre-cache common queries
 
@@ -364,6 +381,40 @@ WeRace is a mobile application for Formula 1 fans that provides comprehensive ac
 ## AI Agent Specification
 
 > **⚠️ Login Required:** The AI agent is only available to authenticated users. Unauthenticated users who tap "Ask AI" must be prompted to log in first. This enables per-user rate limiting, conversation persistence, and cost tracking.
+
+> **📅 Phase 2 Feature:** The AI agent ships in Phase 2 (2-3 weeks after Phase 1 MVP launch). Phase 1 lays the groundwork with read-only DB role, database views, and schema documentation.
+
+### AI Safety Architecture
+
+The AI agent uses a defense-in-depth approach with 4 stacked safety layers. If any single layer fails, the next layer catches the issue.
+
+#### Layer 1 — Database Access Control
+- **Read-only PostgreSQL role** (`werace_ai_readonly`) with SELECT-only grants on F1 data tables
+- No INSERT, UPDATE, DELETE, DROP, or DDL permissions
+- Dedicated connection pool isolated from application writes
+
+#### Layer 2 — Schema-Aware LLM Prompts
+- System prompts constrain the LLM to generate SELECT queries only
+- Prompt includes explicit schema documentation (table names, column names, relationships)
+- LLM instructed to refuse non-F1 questions and prediction requests
+
+#### Layer 3 — SQL Validation Middleware
+- Parse generated SQL before execution
+- **Reject:** Non-SELECT statements, subqueries with side effects, unauthorized table references
+- **Enforce:** Table allowlist (only F1 data tables), column allowlist where applicable
+- Runs between LLM response and database execution
+
+#### Layer 4 — Execution Limits
+- `statement_timeout`: 5 seconds maximum per query
+- Forced `LIMIT 1000` on all result sets
+- Dedicated connection pool with max connections cap
+- API-level rate limiting: **50 queries/day** per authenticated user (tunable based on usage data)
+
+#### Content Boundaries
+- **In scope:** Historical F1 race data, driver statistics, team records, circuit information
+- **Out of scope:** Predictions, betting advice, driver personal lives, controversial incidents, non-F1 topics
+- **Historical-only for MVP:** No current-season predictions or speculative answers
+- Azure OpenAI budget ceiling: TBD during Phase 2 planning
 
 ### Capabilities
 The AI agent answers natural language questions about F1 using a retrieval-augmented generation (RAG) approach:

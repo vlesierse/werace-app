@@ -56,3 +56,55 @@
 - Identifying edge cases that will need acceptance criteria
 
 **Full PRD Review:** See `docs/PRD-REVIEW.md` (36 questions with reasoning) and `.squad/decisions.md` (merged findings)
+
+### 2026-02-26: All 4 Critical Blockers Resolved — Development Unblocked (cross-agent)
+
+**Status:** ✅ All critical blockers resolved. Phase 1 sprint planning complete. Sprint 1 starts now.
+
+**Resolved Blockers:**
+- Q25 ✅ Authentication: .NET Identity, email/password + passkeys, anonymous browsing
+- Q12 ✅ Data Source: Jolpica replaces Ergast, database dump import
+- Q18 ✅ AI Safety: Defense-in-depth (4-layer stack), 50/day, historical-only — implemented in Phase 2
+- Q1 ✅ MVP Scope: Phase 1 (5 weeks) data + auth, Phase 2 (2-3 weeks) AI
+
+### 2026-02-26: Phase 1 Plan — Your Assignments
+
+**Plan:** `docs/PHASE1-PLAN.md` (5 sprints × 1 week, 6 epics)
+**Technical Foundation:** `docs/TECHNICAL-FOUNDATION.md` (solution structure, DDL, API contracts)
+
+**Your Sprint-by-Sprint Work:**
+
+| Sprint | Tasks | Epic | Days |
+|--------|-------|------|------|
+| S1 | Test infrastructure setup (xUnit, Jest) | E6 | 2 |
+| S2 | API endpoint unit tests (seasons, races), data integrity validation tests | E6 | 3 |
+| S3 | API tests (circuits, standings, qualifying), integration tests (pipeline import) | E6 | 3 |
+| S4 | Auth flow tests (register, login, gated access), E2E test skeleton (3 core flows) | E6 | 4 |
+| S5 | Performance baseline tests (P95 latency), full regression test pass | E6 | 3 |
+
+**Key Decisions That Affect You:**
+1. **Test coverage target:** >80% unit test coverage for API endpoints.
+2. **E2E flows to cover:** (a) Browse season → race → results, (b) search driver, (c) register + login.
+3. **Performance baseline:** P95 < 300ms for all data endpoints (warm cache). Automated check for top 10 endpoints.
+4. **Integration tests:** Data pipeline import → query → verify. Auth flows end-to-end.
+5. **Quality gate:** Zero critical/high-severity bugs open at Phase 1 ship.
+6. **API contracts:** All endpoints use consistent JSON envelope `{ "data", "pagination", "error" }`. Test response shapes against `docs/API-CONTRACTS.md`.
+
+**Acceptance Criteria You Verify:**
+- All Jolpica data loads without errors (seasons 1950–present)
+- Foreign key constraints pass (no orphaned results)
+- All API endpoints return correct data validated against source
+- Pagination works correctly
+- Redis cache hit ratio >80% for repeated requests
+- All database views return correct aggregations
+- `werace_ai_readonly` role is SELECT-only (verified)
+
+**Dependencies:**
+- Test infrastructure can start immediately (S1, no blockers)
+- API tests follow Gilfoyle's endpoint delivery schedule
+- E2E tests need both API and frontend screens (S4)
+
+**Data Model Decisions (Q3, Q4, Q5) — Know This:**
+- Q3: Sprint races → separate `sprint_results` table (Jolpica-aligned)
+- Q4: Qualifying → separate `qualifying` table with Q1/Q2/Q3 columns
+- Q5: Pit stops → included in Phase 1 (`pit_stops` table, `GET /races/{id}/pit-stops`)

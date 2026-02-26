@@ -48,3 +48,17 @@
 - **Q1 (MVP Scope):** Presented 3 options. Team unanimously recommends Option B (MVP-Lite: data browsing + nav + auth in Phase 1, AI agent as 2-3 week fast-follow in Phase 2). Key product position taken: the riskiest hypothesis is whether F1 fans want a mobile historical data app — validate that first. AI on a battle-tested data layer is better than AI on an untested one. Auth must be in Phase 1 regardless (prerequisite for AI rate limiting, monetization, personalization). Option C (no auth) creates expensive technical debt.
 - **Decisions requested from Vincent:** 7 specific decisions covering safety approach, rate limits, budget ceiling, prediction policy, phase approval, teaser UI, and phase gap timing.
 - **Team alignment observed:** Richard and Gilfoyle arrived at the same conclusions independently. Differences are implementation-level (SQL parser choice, rate limiter library, exact rate limit numbers) — not strategic. Strong consensus makes this a clean proposal.
+
+### 2026-02-26 — All 4 Critical Blockers Resolved (Q18 + Q1)
+
+- **Status:** All 4 critical blockers from the PRD review are now resolved. Development can begin.
+  - Q25 ✅ Authentication (.NET Identity, email/password + passkeys)
+  - Q12 ✅ Data Source (Jolpica replaces Ergast)
+  - Q18 ✅ AI Safety Rails (defense-in-depth, 4-layer stack, 50/day, historical-only)
+  - Q1 ✅ MVP Scope (two-phase: MVP-Lite → AI fast-follow)
+- **Q18 decision:** Vincent approved Option A — Defense-in-Depth. 4-layer safety stack (read-only DB → schema-aware prompts → SQL validation middleware → execution limits). 50 queries/day per user. Historical-only, no predictions. Azure OpenAI budget TBD in Phase 2. Full natural language flexibility preserved.
+- **Q1 decision:** Vincent approved Option B — MVP-Lite + AI Fast-Follow. Phase 1 (4-6 weeks) = data browsing + navigation + auth + AI foundations. Phase 2 (2-3 weeks) = AI agent with safety rails. "AI Coming Soon" teaser deferred to team. 2-3 week gap acceptable.
+- **PRD updated:** Core Features restructured into Phase 1 / Phase 2. AI Safety Architecture subsection added to AI Agent Specification. Feature Prioritization in decisions.md reflects new phasing.
+- **PRD-REVIEW updated:** Q18 and Q1 marked as ✅ RESOLVED with blockquotes. Recommendations #3 and #4 marked as ✅ RESOLVED with strikethrough.
+- **decisions.md updated:** Q18 and Q1 blockers marked as ✅ RESOLVED with full resolution details. Feature Prioritization updated to two-phase approach.
+- **Next step:** Phase 1 sprint planning begins. The team has a clear, scoped, de-risked MVP target.

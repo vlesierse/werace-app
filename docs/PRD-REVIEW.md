@@ -23,7 +23,11 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 ### Scope & Priority
 
-**Q1.** The MVP includes three major features: historical data browsing, AI-powered Q&A, and core mobile navigation. That's ambitious. **Could we ship an MVP with just data browsing + navigation, and add the AI agent as a fast-follow?** What's the minimum feature set that validates the product hypothesis?
+**Q1.** ✅ **RESOLVED** — The MVP includes three major features: historical data browsing, AI-powered Q&A, and core mobile navigation. That's ambitious. **Could we ship an MVP with just data browsing + navigation, and add the AI agent as a fast-follow?** What's the minimum feature set that validates the product hypothesis?
+
+> **Vincent's Answer (2026-02-26):** Approved Option B — MVP-Lite + AI Fast-Follow (team recommendation). Two-phase approach with 2-3 week gap between phases. "AI Coming Soon" teaser deferred to team decision during Phase 1 planning.
+>
+> **Resolution:** Phase 1 (4-6 weeks): Historical data browsing + core mobile navigation + authentication. Phase 2 (2-3 weeks after Phase 1): AI-powered Q&A agent with defense-in-depth safety rails. Phase 1 includes AI foundations (read-only DB role, database views, schema docs) so Phase 2 can start immediately. Auth ships in Phase 1 as prerequisite for Phase 2 rate limiting. See `docs/PRD.md` § Core Features for updated scope.
 
 **Q2.** Search is listed under P0 ("Find races, drivers, teams by name or year") but there's no search endpoint in the API surface. **Is search a simple client-side filter, or does it need a dedicated backend endpoint?** If backend, what fields are searchable? Fuzzy matching? Autocomplete?
 
@@ -67,7 +71,11 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 ### AI Agent Behavior
 
-**Q18.** The AI agent uses "LLM to generate SQL queries from natural language." **What are the security guardrails against SQL injection or destructive queries?** Is the LLM limited to read-only queries? Is there a query allowlist? Is the SQL validated before execution?
+**Q18.** ✅ **RESOLVED** — The AI agent uses "LLM to generate SQL queries from natural language." **What are the security guardrails against SQL injection or destructive queries?** Is the LLM limited to read-only queries? Is there a query allowlist? Is the SQL validated before execution?
+
+> **Vincent's Answer (2026-02-26):** Approved Option A — Defense-in-Depth (team recommendation). 4-layer safety stack, 50 queries/day per user, historical-only for MVP (no predictions), Azure OpenAI budget TBD in Phase 2 planning.
+>
+> **Resolution:** Defense-in-depth safety architecture with 4 stacked layers: (1) read-only DB role (`werace_ai_readonly`), (2) schema-aware LLM prompts constrained to SELECT-only on F1 data tables, (3) SQL validation middleware (reject non-SELECT, enforce table allowlist), (4) execution limits (`statement_timeout` 5s, forced `LIMIT 1000`, dedicated connection pool). Rate limiting: 50 queries/day per authenticated user at API level. Content boundaries: F1-only, historical-only, no predictions, no personal data. Full implementation in Phase 2. See `docs/PRD.md` § AI Safety Architecture.
 
 **Q19.** **What happens when the AI backend (Azure OpenAI) is unavailable?** Is there a fallback (cached responses, graceful degradation, error message)? What's the acceptable downtime?
 
@@ -138,9 +146,9 @@ The PRD has significant gaps in **acceptance criteria**, **edge case handling**,
 
 2. ✅ **~~Confirm data source (Q12)~~** — RESOLVED. Jolpica API (Ergast-compatible) replaces Ergast as primary historical data source. Database dump files available for direct PostgreSQL import. See `.squad/decisions/inbox/monica-data-source-followups.md` for follow-up questions.
 
-3. **Define AI safety rails (Q18, Q20, Q22)** — SQL generation from untrusted user input is a security risk. Rate limiting, query validation, and content boundaries must be specified before development.
+3. ✅ **~~Define AI safety rails (Q18, Q20, Q22)~~** — RESOLVED. Defense-in-depth: 4-layer safety stack (read-only DB role → schema-aware prompts → SQL validation middleware → execution limits). 50 queries/day, historical-only scope. Implementation in Phase 2. See PRD § AI Safety Architecture.
 
-4. **Scope the MVP tighter (Q1)** — Three major features in MVP is risky. Recommend shipping data browsing + navigation first, then AI agent in a fast-follow.
+4. ✅ **~~Scope the MVP tighter (Q1)~~** — RESOLVED. Two-phase approach approved: Phase 1 (4-6 weeks) = data browsing + navigation + auth. Phase 2 (2-3 weeks) = AI agent with safety rails. See PRD § Core Features.
 
 5. **Add missing data model entities (Q3, Q4, Q5)** — Qualifying, Sprint, and PitStop need data models if they're in scope.
 

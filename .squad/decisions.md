@@ -44,11 +44,17 @@
 
 ### Feature Prioritization
 
-**P0 (MVP) Scope**
+**P0 (MVP) Scope — Two-Phase Approach**
+
+*Phase 1 — MVP (4-6 weeks):*
 - Historical race data browsing (seasons, races, results, standings)
-- AI Q&A agent for F1 questions
 - Core mobile navigation with dark/light mode
 - Driver/team profiles with career stats
+- Authentication (.NET Identity, email/password + passkeys)
+- AI foundations (read-only DB role, database views, schema docs)
+
+*Phase 2 — AI Fast-Follow (2-3 weeks after Phase 1):*
+- AI Q&A agent for F1 questions (with defense-in-depth safety architecture)
 
 **P1 (Post-MVP) Scope**
 - Race weekend companion (schedule, session results, push notifications)
@@ -137,15 +143,23 @@ Free with ads, freemium, or paid upfront
 
 **Action:** Vincent to confirm F1–F6. Most critical for pipeline: F2, F5. Most critical for legal: F4.
 
-**Q18 — AI Safety Rails**
-- **Issue:** AI agent uses "LLM to generate SQL queries from natural language" with no security guardrails specified
-- **Impact:** SQL injection risk from untrusted user input; rate limiting undefined; no query allowlist
-- **Decision Needed:** How is SQL generation validated? Is LLM limited to read-only? Query allowlist required?
+**Q18 — AI Safety Rails** ✅ RESOLVED
+- **Resolution:** Defense-in-depth safety architecture (Option A — team recommendation accepted).
+  - **4-layer safety stack:** Read-only DB role (`werace_ai_readonly`) → schema-aware LLM prompts → SQL validation middleware → execution limits (`statement_timeout` 5s, `LIMIT 1000`)
+  - **Rate limiting:** 50 queries/day per authenticated user (tunable based on data)
+  - **Content scope:** Historical F1 data only — no predictions, no personal data, no non-F1 topics
+  - **Budget:** Azure OpenAI monthly ceiling TBD during Phase 2 planning
+- **Impact:** Full natural language flexibility preserved while eliminating SQL injection surface. Implementation in Phase 2.
+- **Documented in:** `docs/PRD.md` § AI Safety Architecture
 
-**Q1 — MVP Scope Assessment**
-- **Issue:** MVP includes three major features: historical data browsing, AI Q&A, and core mobile navigation
-- **Risk:** May be too ambitious for a first release; high rework risk if scope is overscoped
-- **Recommendation:** Ship MVP-lite with data browsing + navigation, add AI agent as fast-follow
+**Q1 — MVP Scope Assessment** ✅ RESOLVED
+- **Resolution:** MVP-Lite + AI Fast-Follow (Option B — team recommendation accepted).
+  - **Phase 1 (4-6 weeks):** Historical data browsing + core navigation + authentication + AI foundations
+  - **Phase 2 (2-3 weeks after Phase 1):** AI-powered Q&A agent with defense-in-depth safety rails
+  - **"AI Coming Soon" teaser:** Deferred to team decision during Phase 1 planning
+  - **Phase gap:** 2-3 weeks acceptable
+- **Impact:** Reduces MVP risk by shipping deterministic CRUD first. Auth in Phase 1 enables Phase 2 rate limiting. AI foundations laid in Phase 1 for seamless Phase 2 start.
+- **Documented in:** `docs/PRD.md` § Core Features
 
 ### Additional Priority Questions
 
@@ -200,12 +214,53 @@ Free with ads, freemium, or paid upfront
 9. Analytics instrumentation (Q34) → can't measure success metrics without it
 10. Accessibility conformance (Q27) → WCAG 2.1 AA is standard for mobile apps
 
-**Action:** Vincent must respond to all 36 questions in `docs/PRD-REVIEW.md` (numbered for easy reference). Critical path: Q1, Q12, Q18, Q25.
+**Action:** ~~Vincent must respond to all 36 questions in `docs/PRD-REVIEW.md` (numbered for easy reference). Critical path: Q1, Q12, Q18, Q25.~~ All 4 critical blockers now resolved.
+
+## Phase 1 Plan Decisions (2026-02-26)
+
+**By:** Richard (Lead / Architect)
+**Document:** `docs/PHASE1-PLAN.md`
+**Status:** 🟢 Ready for execution
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| 1 | **5 sprints × 1 week** | 5 weeks balances the 4–6 week window. 1 sprint buffer over minimum. |
+| 2 | **6 epics: Scaffolding, Data Pipeline, API, Auth, Mobile UI, AI Foundations** | Clean separation. Each epic has single primary owner. Dependencies flow left-to-right. |
+| 3 | **Offset-based pagination, pageSize=20, max 100** | Simpler than cursor for static historical data. Revisit for Phase 2 live data. |
+| 4 | **Consistent JSON envelope: `{ "data", "pagination", "error" }`** | Every endpoint same shape. Errors are structured, not strings. |
+| 5 | **Client-side search for Phase 1** | Driver/constructor/circuit lists < 1000 items. Evaluate backend search in Phase 2. |
+| 6 | **Mock data decoupling** | Dinesh builds UI against API contracts with JSON fixtures. Prevents Gilfoyle bottleneck. |
+| 7 | **Passkeys as best-effort** | FIDO2 in React Native uncertain. Email/password satisfies Phase 1 requirements. Backend supports passkeys regardless. |
+| 8 | **5 database views as AI foundations** | `v_driver_career_stats`, `v_constructor_season_stats`, `v_race_summary`, `v_head_to_head`, `v_circuit_records`. Zero cost now, immediate Phase 2 value. |
+| 9 | **Redis for caching AND per-user request tracking** | Single Redis instance dual-purpose. Historical data 24h, current season 1h. Per-user counters for Phase 2 rate limiting. |
+| 10 | **Richard as fallback for API endpoints** | Lead picks up simpler endpoints if Gilfoyle bottleneck hits. |
+
+## Data Model Decisions (2026-02-26)
+
+**By:** Gilfoyle (Backend Developer)
+**Document:** `docs/TECHNICAL-FOUNDATION.md`
+**Status:** Proposals — accepted into Phase 1 plan
+
+### Q3 — Sprint Races: Separate `sprint_results` Table
+
+**Decision:** Model sprint races as a separate `sprint_results` table mirroring the `results` table structure.
+**Rationale:** Aligns with Jolpica dump format (near-zero transformation). Clean API surface (`/races/{id}/sprint`). Sprint format keeps changing (2021–present) — separate table isolates volatility. No `session_type` filter needed on race results queries.
+
+### Q4 — Qualifying: Separate `qualifying` Table
+
+**Decision:** Qualifying is a separate entity with Q1/Q2/Q3 time columns.
+**Rationale:** Different data shape than race results (Q1/Q2/Q3 times vs. position/laps/time). Jolpica stores qualifying separately. Historical format variation (single-lap, aggregate, knockout) handled by nullable columns. API maps directly: `GET /races/{id}/qualifying`.
+
+### Q5 — Pit Stops: Included in Phase 1
+
+**Decision:** Include `pit_stops` table and `GET /races/{id}/pit-stops` endpoint in Phase 1.
+**Rationale:** Zero additional development cost (Jolpica dump includes pit stops). High browsing value for race strategy. Enables best AI queries in Phase 2. Data available 2012–present. ~2 hours of work for high return.
+
 ## Blocker Proposals — Q18 & Q1 (2026-02-26)
 
 ### Q18 — AI Safety Rails: Team Proposals
 
-**Status:** 🟡 Awaiting Vincent's decision on 4 items
+**Status:** ✅ RESOLVED — Vincent approved Option A (Defense-in-Depth)
 
 **Context:** The AI agent generates SQL from natural language with no security guardrails specified. Richard and Gilfoyle independently brainstormed architectural and implementation approaches. Monica synthesized into 3 options.
 
@@ -240,7 +295,7 @@ Free with ads, freemium, or paid upfront
 
 ### Q1 — MVP Scope: Team Proposals
 
-**Status:** 🟡 Awaiting Vincent's decision on 3 items
+**Status:** ✅ RESOLVED — Vincent approved Option B (MVP-Lite + AI Fast-Follow)
 
 **Context:** Current MVP includes data browsing + AI agent + navigation. Both Richard and Gilfoyle assess this as too ambitious. AI doubles backend effort (2-3 weeks → 4-6 weeks) and introduces non-deterministic testing challenges. The AI agent is architecturally additive — clean separation confirmed.
 
