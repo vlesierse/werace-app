@@ -72,3 +72,28 @@
 - **Clean separation confirmed:** AI agent is additive (sits on top of data layer), not entangled with browsing. No schema or API contract changes needed to defer.
 - **Phase 1 foundations:** Build DB views for common queries, auth infrastructure, Redis, schema documentation — all serve Phase 2 AI with zero waste.
 - **Key argument:** Validate "do F1 fans want a mobile data app?" before investing in AI. The data browsing app is a real product on its own.
+
+### 2026-02-26: Phase 1 Plan Created
+
+**What:** Authored `docs/PHASE1-PLAN.md` — comprehensive sprint plan for Phase 1 execution. Filed architectural decisions to `.squad/decisions/inbox/richard-phase1-plan.md`.
+
+**Plan Structure:**
+- **Timeline:** 5 sprints × 1 week = 5 weeks
+- **6 Epics:** E1 Scaffolding → E2 Data Pipeline → E3 API Layer → E4 Authentication → E5 Mobile UI → E6 AI Foundations
+- **Critical path:** Gilfoyle (E1→E2→E3→E4), Dinesh decoupled via mock data and API contracts
+
+**Key Architectural Decisions:**
+- Offset-based pagination (pageSize=20, max 100) — simpler than cursor for static historical data
+- Consistent JSON response envelope (`{ "data", "pagination", "error" }`) across all endpoints
+- Client-side search for Phase 1 (datasets small enough); backend search evaluated in Phase 2
+- 5 database views as zero-cost AI foundations (`v_driver_career_stats`, `v_constructor_season_stats`, `v_race_summary`, `v_head_to_head`, `v_circuit_records`)
+- Redis dual-purpose: response caching (24h historical, 1h current) + per-user request counters
+- Mock data strategy to decouple frontend from backend timeline
+- Passkeys best-effort; email/password is the Phase 1 baseline
+
+**Risks Identified:**
+1. Jolpica dump format unknown — mitigated by Day 1 analysis + pgloader fallback
+2. Passkey React Native maturity — mitigated by email/password baseline
+3. Gilfoyle single-threaded on critical path — mitigated by mock decoupling + Richard as backup on simpler endpoints
+
+**10 open items tracked** with owners and sprint deadlines (Q3, Q4, Q5, Q2, Q7, Q9, Q10, Q12-F2, Q12-F5, Q25-F4).
