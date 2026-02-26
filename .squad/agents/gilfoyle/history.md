@@ -151,3 +151,11 @@
 - Solution uses `.slnx` format (new default in .NET 10)
 - `dotnet run --project src/api/WeRace.AppHost` starts everything
 
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Dinesh (Frontend):** Expo SDK 55 app created at `src/app/`. 5-tab navigation (Home, Seasons, Drivers, Constructors, Settings). Theme system with AsyncStorage persistence. No backend dependency yet — will use mock data until API endpoints land.
+
+**Jared (Testing):** Test project at `tests/WeRace.Api.Tests/` added to solution. xUnit + FluentAssertions + WebApplicationFactory. Health check integration test commented out, waiting for you to uncomment the `WeRace.Api` project reference. Run `dotnet test tests/WeRace.Api.Tests/` to verify.
+
+**PR #8** opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
+

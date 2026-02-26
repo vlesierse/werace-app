@@ -137,3 +137,11 @@
 
 **Decision:** Test projects at `tests/` not `src/api/` — follows TECHNICAL-FOUNDATION.md solution structure.
 **Decision:** Gilfoyle must add test project to solution: `dotnet sln add tests/WeRace.Api.Tests/`
+
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Gilfoyle (Backend):** Backend created at `src/api/` with 3 projects (AppHost, ServiceDefaults, Api). Health endpoints at `/health` and `/alive`. Test project reference to `WeRace.Api` now active — health check integration test ready to uncomment. Solution builds 0 warnings, 0 errors.
+
+**Dinesh (Frontend):** Expo app at `src/app/` with 5 screens. Jest placeholder passes. Real render test in `__tests__/App.test.tsx` ready to uncomment.
+
+**Post-work:** Test project wired into solution. 1/1 tests pass. PR #8 opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.

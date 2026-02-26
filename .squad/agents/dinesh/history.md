@@ -161,3 +161,11 @@
 
 **Stack versions:** Expo 55, React 19.2, React Native 0.83.2, Paper 5.15, Navigation 7.1, AsyncStorage 3.0
 
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Gilfoyle (Backend):** .NET 10 backend created at `src/api/`. Three projects: AppHost (Aspire orchestrator with PostgreSQL + Redis), ServiceDefaults, Api. Solution uses `.slnx` format. Start everything with `dotnet run --project src/api/WeRace.AppHost`.
+
+**Jared (Testing):** Jest placeholder at `src/app/__tests__/App.test.tsx`. Real render test commented out, waiting for your App component. Test naming convention: `it('should [behavior] when [condition]')`. See `docs/TESTING.md`.
+
+**PR #8** opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
+
