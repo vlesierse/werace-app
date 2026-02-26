@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../../tests/WeRace.Api.Tests/WeRace.Api.Tests.csproj" />
+  <Project Path="WeRace.Api/WeRace.Api.csproj" />
+  <Project Path="WeRace.AppHost/WeRace.AppHost.csproj" />
+  <Project Path="WeRace.ServiceDefaults/WeRace.ServiceDefaults.csproj" />
+</Solution>
