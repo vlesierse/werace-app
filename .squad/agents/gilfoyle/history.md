@@ -113,3 +113,15 @@
 - **Rate limiting:** Built-in `System.Threading.RateLimiting` for burst control + DB/Redis counter for daily caps. Global circuit breaker for cost spikes.
 - **Biggest concern:** Query correctness, not security. The LLM will generate wrong-but-valid SQL producing confident wrong answers. Need a curated test suite of known questions → expected results.
 - **MVP scope:** Defer AI to post-MVP. Data browsing API is ~2-3 weeks; AI adds another ~2-3 weeks and significant testing risk. AI is architecturally separate and can be added cleanly later. Even if deferred, include: schema generation script for LLM prompts and read-only DB role in initial migration.
+
+### 2026-02-26: Technical Foundation Defined for Phase 1
+
+- **Document:** `docs/TECHNICAL-FOUNDATION.md` — complete technical blueprint for Phase 1 implementation
+- **Solution structure:** 6 projects (`AppHost`, `ServiceDefaults`, `Api`, `Domain`, `Infrastructure`, `DataImport`). Domain has zero dependencies. Infrastructure owns EF Core config. Api owns endpoints and DI.
+- **Database schema:** Full DDL for 14 tables (seasons, circuits, races, drivers, constructors, status, results, qualifying, sprint_results, pit_stops, lap_times, driver_standings, constructor_standings, constructor_results) + Identity in separate `identity` schema + `user_profiles` + `passkey_credentials`.
+- **Schema decisions proposed (Q3, Q4, Q5):** Separate `qualifying` table (different data shape), separate `sprint_results` table (Jolpica-aligned, isolates format changes), pit stops included in Phase 1 (zero marginal cost, high data value). Written to `.squad/decisions/inbox/gilfoyle-data-model-recommendations.md`.
+- **Data pipeline:** Jolpica MySQL dump → CSV extraction → PostgreSQL COPY bulk load. `WeRace.DataImport` CLI tool handles full seed and delta re-import. Schema mapping is mostly 1:1 (camelCase → snake_case, `year` → `season_id` FK).
+- **API contract:** 25+ endpoints across 6 resource groups. Offset-based pagination (static data, no cursor drift). Consistent error envelope. Scalar for API docs.
+- **Auth:** .NET Identity with JWT (1h access / 30d refresh with rotation). Email/password ships Phase 1. Passkey table created, endpoints stubbed pending React Native feasibility.
+- **AI foundations (zero-cost):** `werace_ai_readonly` role SQL, 7 database views for common queries, schema docs via `COMMENT ON`, reserved `/api/v1/ai/*` namespace returning 501.
+- **Aspire config:** PostgreSQL + pgAdmin + Redis + RedisInsight, single database with schema separation.
