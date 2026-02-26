@@ -201,3 +201,70 @@ Free with ads, freemium, or paid upfront
 10. Accessibility conformance (Q27) → WCAG 2.1 AA is standard for mobile apps
 
 **Action:** Vincent must respond to all 36 questions in `docs/PRD-REVIEW.md` (numbered for easy reference). Critical path: Q1, Q12, Q18, Q25.
+## Blocker Proposals — Q18 & Q1 (2026-02-26)
+
+### Q18 — AI Safety Rails: Team Proposals
+
+**Status:** 🟡 Awaiting Vincent's decision on 4 items
+
+**Context:** The AI agent generates SQL from natural language with no security guardrails specified. Richard and Gilfoyle independently brainstormed architectural and implementation approaches. Monica synthesized into 3 options.
+
+**Team Consensus:**
+- Read-only DB user (`werace_ai_readonly`) is non-negotiable
+- Schema-aware LLM prompts constrained to SELECT-only on F1 data tables
+- Query validation middleware parses SQL before execution (reject non-SELECT, enforce table allowlist)
+- Execution limits: `statement_timeout` (5s), forced `LIMIT 1000`, dedicated connection pool
+- Rate limiting at API level before LLM call (not at DB level)
+- Content boundaries: F1-only, historical-only, no predictions, no personal data
+- Defer strict query template/allowlist — preserves natural language flexibility
+
+**Options Presented to Vincent:**
+
+| Option | Approach | Security | UX | Effort |
+|--------|----------|----------|-----|--------|
+| **A (Recommended)** | Defense-in-depth: 4 stacked safety layers | Strong — any single failure caught by next layer | Full natural language flexibility | ~3-4 days for validation pipeline |
+| **B** | Strict template/allowlist — LLM picks from pre-approved queries | Maximum — zero injection surface | Significantly limited — only pre-anticipated questions work | Similar effort + ongoing template maintenance |
+| **C** | Minimal — read-only user + prompts only, no validation middleware | Adequate floor but no defense-in-depth | Full flexibility | Saves 2-3 days vs. A |
+
+**Decisions Required from Vincent:**
+
+| # | Decision | Options |
+|---|----------|---------|
+| 1 | Approve defense-in-depth safety approach (Option A)? | Yes / No (B or C instead) |
+| 2 | Daily AI query limit per user? | Richard: 50/day, Gilfoyle: ~100/day |
+| 3 | Monthly Azure OpenAI budget ceiling? | ~$0.01/query; 1K users × 20 queries/day ≈ $6K/month |
+| 4 | Allow prediction questions or historical-only? | Team leans historical-only for MVP |
+
+**Full proposals:** `.squad/decisions/inbox/monica-blocker-proposals.md`
+**Technical details:** `.squad/decisions/inbox/richard-blocker-brainstorm.md`, `.squad/decisions/inbox/gilfoyle-blocker-brainstorm.md`
+
+### Q1 — MVP Scope: Team Proposals
+
+**Status:** 🟡 Awaiting Vincent's decision on 3 items
+
+**Context:** Current MVP includes data browsing + AI agent + navigation. Both Richard and Gilfoyle assess this as too ambitious. AI doubles backend effort (2-3 weeks → 4-6 weeks) and introduces non-deterministic testing challenges. The AI agent is architecturally additive — clean separation confirmed.
+
+**Team Consensus:**
+- AI can be cleanly deferred — no coupling to browsing features
+- Data browsing alone is a real, shippable product
+- Auth must ship in MVP regardless (needed for AI rate limiting, personalization, monetization)
+- AI roughly doubles backend effort with significantly more unknowns
+- Lay AI foundations in Phase 1: read-only DB role, database views, schema docs
+
+**Options Presented to Vincent:**
+
+| Option | Approach | Timeline | Risk |
+|--------|----------|----------|------|
+| **A** | Full MVP (browsing + AI + nav together) | 6-9 weeks | High — AI unknowns on critical path |
+| **B (Recommended)** | MVP-Lite Phase 1 (browsing + nav + auth), AI Fast-Follow Phase 2 | Phase 1: 4-6 weeks, Phase 2: 2-3 weeks | Low-Medium — Phase 1 is deterministic CRUD |
+| **C** | Bare-bones (browsing only, no auth) | 2-4 weeks | Low tech risk, high product risk — no path to AI/monetization without retrofit |
+
+**Decisions Required from Vincent:**
+
+| # | Decision | Options |
+|---|----------|---------|
+| 5 | Approve two-phase approach (Option B)? | Yes / No (A or C instead) |
+| 6 | Include "AI Coming Soon" teaser in Phase 1? | Yes (builds anticipation) / No (cleaner launch) |
+| 7 | Acceptable gap between Phase 1 and Phase 2? | 2-3 weeks recommended |
+
+**Full proposals:** `.squad/decisions/inbox/monica-blocker-proposals.md`

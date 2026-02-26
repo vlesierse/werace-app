@@ -57,3 +57,18 @@
 **6 follow-up questions filed** (F1–F6) covering dump format, sync strategy, licensing, data freshness, completeness, and 2025+ coverage. See `.squad/decisions.md` for details.
 
 **Next priority blockers:** Q18 (AI safety rails) and Q1 (MVP scope assessment).
+### 2026-02-26: Blocker Brainstorm — Q18 (AI Safety) and Q1 (MVP Scope)
+
+**What:** Wrote architectural analysis for the two remaining critical blockers. Filed to `.squad/decisions/inbox/richard-blocker-brainstorm.md` for Monica to synthesize.
+
+**Q18 — AI Safety Rails positions taken:**
+- **Defense in depth:** Read-only PostgreSQL user (non-negotiable) + schema-aware system prompts + SQL validation middleware in .NET + execution time/row limits. Four layers stacked.
+- **Against strict query allowlist for MVP:** Too restrictive, kills the natural language value proposition. Can tighten post-launch if abuse patterns emerge.
+- **Rate limiting:** API middleware with Redis-backed per-user counters (not DB-level, not gateway-level). 50/day, 10/min burst. Azure OpenAI budget caps as cost ceiling.
+- **Content boundaries:** F1-only, historical-only, no speculation, no personal data. Enforced via Azure content filters + system prompt + .NET response validation.
+
+**Q1 — MVP Scope positions taken:**
+- **Defer AI agent from MVP.** Ship data browsing + navigation + auth as MVP-lite. AI agent as 2-3 week fast-follow.
+- **Clean separation confirmed:** AI agent is additive (sits on top of data layer), not entangled with browsing. No schema or API contract changes needed to defer.
+- **Phase 1 foundations:** Build DB views for common queries, auth infrastructure, Redis, schema documentation — all serve Phase 2 AI with zero waste.
+- **Key argument:** Validate "do F1 fans want a mobile data app?" before investing in AI. The data browsing app is a real product on its own.

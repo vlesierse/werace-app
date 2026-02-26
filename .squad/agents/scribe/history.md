@@ -53,3 +53,18 @@
 **Next Action:** Vincent must respond to all 36 questions in `docs/PRD-REVIEW.md`. Critical path: Q1, Q12, Q18, Q25.
 
 **Documentation Files:** See `.squad/decisions.md` for merged PRD review findings, `.squad/log/2026-02-23-prd-review.md` for session log
+### 2026-02-26: Blocker Brainstorm — Q18 & Q1 Proposals
+
+**Session:** Coordinated brainstorm on remaining critical blockers Q18 (AI Safety Rails) and Q1 (MVP Scope).
+
+**Agents:** Richard (architecture), Gilfoyle (implementation), Monica (synthesis).
+
+**Merged to decisions.md:**
+- Q18 proposals: 3 options (defense-in-depth recommended), 4 decisions for Vincent
+- Q1 proposals: 3 options (MVP-Lite + AI fast-follow recommended), 3 decisions for Vincent
+
+**Orchestration logs:** `2026-02-26T10-00-richard.md`, `2026-02-26T10-00-gilfoyle.md`, `2026-02-26T10-00-monica.md`
+
+**Session log:** `.squad/log/2026-02-26-blocker-brainstorm.md`
+
+**Status:** 🟡 Awaiting Vincent's input on 7 decisions before sprint planning can begin.

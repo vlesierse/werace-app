@@ -101,3 +101,15 @@
 
 
 **Full Details:** See `docs/PRD-REVIEW.md` (36 questions with full context) and `.squad/decisions.md` (merged PRD review findings)
+
+### 2026-02-26: Blocker Brainstorm — Q18 (AI Safety Rails) & Q1 (MVP Scope)
+
+**Output:** `.squad/decisions/inbox/gilfoyle-blocker-brainstorm.md` — written for Monica to synthesize.
+
+**Positions taken:**
+
+- **AI SQL safety:** Belt-and-suspenders approach. Dedicated read-only PostgreSQL role (`werace_ai_readonly`) is the real safety net. SQL validation pipeline (text checks → EXPLAIN-based parsing → table/operation allowlists → row limits) is defense-in-depth. Use `Microsoft.Extensions.AI` + `Azure.AI.OpenAI` for LLM integration. No ORM for AI-generated queries — raw `NpgsqlCommand` on read-only connection.
+- **Schema exposure:** Give LLM a subset of the schema (F1 data tables only, never auth/user tables). Generate schema context programmatically from the DB, not hardcoded strings.
+- **Rate limiting:** Built-in `System.Threading.RateLimiting` for burst control + DB/Redis counter for daily caps. Global circuit breaker for cost spikes.
+- **Biggest concern:** Query correctness, not security. The LLM will generate wrong-but-valid SQL producing confident wrong answers. Need a curated test suite of known questions → expected results.
+- **MVP scope:** Defer AI to post-MVP. Data browsing API is ~2-3 weeks; AI adds another ~2-3 weeks and significant testing risk. AI is architecturally separate and can be added cleanly later. Even if deferred, include: schema generation script for LLM prompts and read-only DB role in initial migration.
