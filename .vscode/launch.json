@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Aspire",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-apphost",
+      "program": "${workspaceFolder}/src/api/WeRace.AppHost/bin/Debug/net10.0/WeRace.AppHost.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/api/WeRace.AppHost",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "WeRace API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/src/api/WeRace.Api/bin/Debug/net10.0/WeRace.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/api/WeRace.Api",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-apphost",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/api/WeRace.AppHost/WeRace.AppHost.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/api/WeRace.Api/WeRace.Api.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
