@@ -36,7 +36,7 @@
 
 ## Coding Agent
 
-<!-- copilot-auto-assign: true -->
+<!-- copilot-auto-assign: false -->
 
 ### Capabilities
 
