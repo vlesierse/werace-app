@@ -29,6 +29,7 @@ How to decide who handles what.
 | `squad:gilfoyle` | Backend, API, database, AI tasks | Gilfoyle |
 | `squad:jared` | Testing, QA, quality tasks | Jared |
 | `squad:monica` | Requirements, functional design, stakeholder tasks | Monica |
+| `squad:copilot` | Autonomous: bug fixes, test writing, dependency updates, scaffolding | @copilot |
 
 ## Rules
 
@@ -38,3 +39,4 @@ How to decide who handles what.
 4. **When two agents could handle it**, pick the one whose domain is the primary concern.
 5. **"Team, ..." → fan-out.** Spawn all relevant agents in parallel as `mode: "background"`.
 6. **Anticipate downstream work.** If a feature is being built, spawn the tester to write test cases from requirements simultaneously.
+7. **@copilot routing** — when Richard triages an issue that matches @copilot's 🟢 capability profile, assign `squad:copilot` label. @copilot picks it up autonomously via issue assignment.
