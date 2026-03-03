@@ -17,12 +17,13 @@
         "ms-dotnettools.csharp",
         "ms-dotnettools.csdevkit",
         "ms-azuretools.vscode-dotnet-runtime",
+        "ms-azuretools.vscode-aspire",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode"
       ]
     }
   },
-  "forwardPorts": [5000, 5001, 8080, 15888, 19888],
-  "postCreateCommand": "dotnet restore && cd src/app && npm install",
+  "forwardPorts": [5150, 7274, 15049, 17108],
+  "postCreateCommand": "dotnet restore && dotnet restore src/api/WeRace.slnx && cd src/app && npm install",
   "remoteUser": "vscode"
 }

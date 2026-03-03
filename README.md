@@ -38,7 +38,7 @@ The Aspire dashboard opens automatically in your browser, showing all services, 
 Once running, verify the API is healthy:
 
 ```bash
-curl http://localhost:5000/health
+curl https://localhost:5150/health
 ```
 
 ## Project Structure
