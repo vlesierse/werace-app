@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql" Version="13.1.2" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.2" />
     <PackageReference Include="Aspire.StackExchange.Redis" Version="13.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WeRace.ServiceDefaults\WeRace.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\WeRace.Domain\WeRace.Domain.csproj" />
+    <ProjectReference Include="..\WeRace.Infrastructure\WeRace.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

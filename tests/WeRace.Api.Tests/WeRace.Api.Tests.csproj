@@ -19,6 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\api\WeRace.Api\WeRace.Api.csproj" />
+    <ProjectReference Include="..\..\src\api\WeRace.Domain\WeRace.Domain.csproj" />
+    <ProjectReference Include="..\..\src\api\WeRace.Infrastructure\WeRace.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\api\WeRace.DataImport\WeRace.DataImport.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,5 +2,8 @@
   <Project Path="../../tests/WeRace.Api.Tests/WeRace.Api.Tests.csproj" />
   <Project Path="WeRace.Api/WeRace.Api.csproj" />
   <Project Path="WeRace.AppHost/WeRace.AppHost.csproj" />
+  <Project Path="WeRace.DataImport/WeRace.DataImport.csproj" />
+  <Project Path="WeRace.Domain/WeRace.Domain.csproj" />
+  <Project Path="WeRace.Infrastructure/WeRace.Infrastructure.csproj" />
   <Project Path="WeRace.ServiceDefaults/WeRace.ServiceDefaults.csproj" />
 </Solution>

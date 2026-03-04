@@ -159,3 +159,58 @@
 
 **PR #8** opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
 
+### 2026-03-04: E2 Data Pipeline — Domain and Infrastructure projects created
+
+**What:** Created `WeRace.Domain` and `WeRace.Infrastructure` projects for the data layer foundation.
+
+**Domain project** (`src/api/WeRace.Domain/`):
+
+- Zero NuGet dependencies. POCO entities only.
+- 14 entity classes in `Entities/`: Season, Circuit, Race, Driver, Constructor, Status, Result, Qualifying, SprintResult, PitStop, LapTime, DriverStanding, ConstructorStanding, ConstructorResult.
+- PascalCase properties mapping to snake_case DB columns.
+- `int` IDs (matching Jolpica SERIAL PRIMARY KEY), `decimal` for points, `DateOnly`/`TimeOnly` for date/time columns.
+- Nullable types for historically sparse columns (pre-2000 data). `string?` for elapsed time columns (VARCHAR in DB), `TimeOnly?` for clock time columns.
+- Navigation properties on FK relationships. Collection navigations on parent entities.
+- `Status.StatusText` maps to `status` column via explicit `HasColumnName` to avoid naming conflict.
+
+**Infrastructure project** (`src/api/WeRace.Infrastructure/`):
+
+- NuGet: EF Core 10.0.3, Npgsql.EFCore.PostgreSQL 10.0.0, EFCore.NamingConventions 10.0.1.
+- `WeRaceDbContext` in `Data/` — 14 DbSets. Does NOT inherit `IdentityDbContext` (E4 Auth scope).
+- 14 `IEntityTypeConfiguration<T>` files in `Data/Configurations/` with table names, PKs (composite for PitStop/LapTime), constraints, FK relationships, and indexes matching `docs/TECHNICAL-FOUNDATION.md` DDL.
+
+**Api changes:** Swapped `Aspire.Npgsql` → `Aspire.Npgsql.EntityFrameworkCore.PostgreSQL`. `Program.cs` registers `WeRaceDbContext` with snake_case naming convention.
+
+**AppHost changes:** Added pgAdmin, data volume, RedisInsight. Fixed `WithReference(db)` to use the database resource.
+
+**Build:** Clean. All 2 tests pass.
+
+### 2026-03-04: E2 Data Pipeline — DataImport CLI and db/ SQL files created
+
+**What:** Created the `WeRace.DataImport` CLI tool and `db/` directory with source-of-truth SQL files.
+
+**db/ directory:**
+
+- `db/schema.sql` — Full PostgreSQL DDL (14 tables, indexes, constraints). Source of truth matching `docs/TECHNICAL-FOUNDATION.md` section 2.
+- `db/views.sql` — 5 database views for AI foundations: `v_driver_career_stats`, `v_constructor_season_stats`, `v_race_summary`, `v_head_to_head`, `v_circuit_records`.
+- `db/roles.sql` — `werace_ai_readonly` role with SELECT-only grants, statement timeout (5s), and defense-in-depth REVOKE on writes.
+- `db/seed/README.md` — Instructions for obtaining the Jolpica dump file and running the import.
+
+**DataImport CLI** (`src/api/WeRace.DataImport/`):
+
+- .NET 10 console app. References `WeRace.Domain` and `WeRace.Infrastructure`.
+- NuGet: `Npgsql 10.0.0`, `System.CommandLine 2.0.0-beta5`.
+- `Program.cs` — CLI entry point with `--source`, `--connection`, `--mode` options via System.CommandLine.
+- `Importers/MySqlDumpParser.cs` — Parses MySQL dump files, extracts INSERT statements per table, handles backtick quoting, MySQL escape sequences (`\'`, `\\`, `\n`), and multi-value INSERTs.
+- `Importers/SchemaMapper.cs` — Maps Jolpica table/column names to WeRace schema (camelCase → snake_case). Handles `races.year → races.season_id` FK resolution via seasons lookup. Normalizes NULL, `\N`, and MySQL zero dates.
+- `Importers/JolpicaDumpImporter.cs` — Orchestrates full pipeline: parse → map → load (FK-respecting order) → reset sequences → validate. Supports `full` (TRUNCATE CASCADE + COPY) and `delta` (temp table + INSERT ON CONFLICT) modes. Uses PostgreSQL text COPY for bulk loading.
+- `Importers/DataValidator.cs` — Post-import validation: row counts (14 tables), FK integrity checks (10 relationships), data range (expect 1950+), spot check (2023 Bahrain GP winner = Verstappen).
+
+**AppHost:** Added TODO comment for future Aspire seed automation. Manual CLI invocation documented for now.
+
+**Solution:** DataImport added to `WeRace.slnx`. Clean build. All 2 existing tests pass.
+
+**Key learnings:**
+
+- `System.CommandLine 2.0.0-beta5` API changed significantly from beta4: `Option<T>(name)` constructor (no `description` param), `Required` property (not `IsRequired`), `SetAction(parseResult => ...)` (not `SetHandler`), `CommandLineConfiguration.InvokeAsync(args)` (not `command.InvokeAsync`).
+- Npgsql version must match EF Core transitive dependency (10.0.0), not lower.

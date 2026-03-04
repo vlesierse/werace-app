@@ -145,3 +145,18 @@
 **Dinesh (Frontend):** Expo app at `src/app/` with 5 screens. Jest placeholder passes. Real render test in `__tests__/App.test.tsx` ready to uncomment.
 
 **Post-work:** Test project wired into solution. 1/1 tests pass. PR #8 opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
+
+### 2026-03-04: Data Pipeline Tests Written (Issue #2)
+
+**What:** Wrote comprehensive tests for the E2 data pipeline covering all four layers: Domain entities, Infrastructure DbContext, DataImport parser, and schema mapper.
+
+**Test files created (4 files, 173 total tests):**
+
+- `tests/WeRace.Api.Tests/DataImport/MySqlDumpParserTests.cs` — 15 tests: INSERT parsing, backtick-quoted names, escape handling (backslash, double-quote), NULL values, numerics, multi-table dumps, non-INSERT skipping, empty files, commas/parentheses in strings
+- `tests/WeRace.Api.Tests/DataImport/SchemaMapperTests.cs` — 30 tests: camelCase-to-snake_case table mapping, column name conversion, FK resolution (races.year → season_id), pass-through tables, NormalizeValue handling
+- `tests/WeRace.Api.Tests/Domain/EntityTests.cs` — 30 tests: property existence, types, nullability (nullable vs non-nullable), navigation properties, collection initialization for Season, Race, Driver, Result, Constructor, Circuit, Status, PitStop, LapTime, Qualifying, SprintResult, DriverStanding, ConstructorStanding, ConstructorResult
+- `tests/WeRace.Api.Tests/Infrastructure/DbContextTests.cs` — 96 tests: 14 DbSets registered, snake_case table names, composite PKs (PitStop, LapTime), single-column PKs, FK relationships (23 foreign keys verified), index coverage (15 indexed columns), unique indexes (year, driver_ref, circuit_ref, season_id+round), all column names match snake_case pattern
+
+**Bug found and fixed:** `MySqlDumpParser.ProcessInsertStatement` had an off-by-one in its `VALUES` keyword position calculation. The `\s*` after `VALUES` in the regex shifted the match length, causing `IndexOf("VALUES", match.Index + match.Length - 6)` to overshoot by one position. Fixed by searching from after the table name capture group instead.
+
+**Project references added:** Test project now references `WeRace.Domain`, `WeRace.Infrastructure`, and `WeRace.DataImport`.

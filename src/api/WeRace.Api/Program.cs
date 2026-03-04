@@ -1,10 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using WeRace.Infrastructure.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Aspire service defaults: OpenTelemetry, health checks, service discovery
 builder.AddServiceDefaults();
 
-// Aspire components: PostgreSQL and Redis
-builder.AddNpgsqlDataSource("werace");
+// Aspire components: PostgreSQL (EF Core) and Redis
+builder.AddNpgsqlDbContext<WeRaceDbContext>("werace", configureDbContextOptions: options =>
+{
+    options.UseSnakeCaseNamingConvention();
+});
 builder.AddRedisClient("redis");
 
 // OpenAPI
