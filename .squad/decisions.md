@@ -396,3 +396,61 @@ Free with ads, freemium, or paid upfront
 **By:** Jared (Tester)
 **What:** Backend: `MethodName_StateUnderTest_ExpectedBehavior`. Frontend: `it('should [behavior] when [condition]')`.
 **Why:** Consistent naming across team makes tests self-documenting.
+
+## E2 Data Pipeline Decisions (2026-03-04)
+
+### Domain & Infrastructure Structure (Gilfoyle)
+
+**14. Status entity property named `StatusText`**
+**By:** Gilfoyle (Backend Developer)
+**What:** The `status` table has a `status` column. C# property named `StatusText` with explicit `HasColumnName("status")` to avoid class/property name conflict.
+**Why:** Entity class name `Status` would collide with a property named `Status`.
+
+**15. Snake case via EFCore.NamingConventions**
+**By:** Gilfoyle (Backend Developer)
+**What:** All column and table naming uses `UseSnakeCaseNamingConvention()` from `EFCore.NamingConventions`. PascalCase C# properties auto-map to snake_case columns.
+**Why:** Convention-based mapping eliminates manual `HasColumnName` calls (except the `StatusText` override above).
+
+**16. No IdentityDbContext yet**
+**By:** Gilfoyle (Backend Developer)
+**What:** `WeRaceDbContext` inherits from `DbContext`, not `IdentityDbContext`. Identity integration deferred to E4 Auth.
+**Why:** Auth is out of scope for E2. Base class changes when Identity lands.
+
+**17. Aspire database resource reference**
+**By:** Gilfoyle (Backend Developer)
+**What:** `AppHost.cs` separates the postgres server resource from the database resource. `WithReference(db)` targets the `werace` database specifically.
+**Why:** Ensures the connection string points to the correct database, not the server.
+
+### Data Pipeline Implementation (Gilfoyle)
+
+**18. PostgreSQL text COPY for bulk loading**
+**By:** Gilfoyle (Backend Developer)
+**What:** Import tool uses `COPY FROM STDIN (FORMAT text)` instead of `NpgsqlBinaryImporter`.
+**Why:** Text COPY handles NULL values and type coercion more gracefully for string-heavy dump data. Performance difference vs. binary is negligible for ~500K rows.
+
+**19. Delta mode uses temp table + INSERT ON CONFLICT**
+**By:** Gilfoyle (Backend Developer)
+**What:** Delta (upsert) mode creates a temp table, COPYs data in, then runs `INSERT ... ON CONFLICT DO UPDATE`.
+**Why:** Avoids row-by-row upsert loops. Single bulk operation. Temp table auto-drops on commit.
+
+**20. System.CommandLine beta5 for CLI parsing**
+**By:** Gilfoyle (Backend Developer)
+**What:** Using `System.CommandLine 2.0.0-beta5.25306.1` (latest prerelease). API uses `SetAction` + `ParseResult.GetValue` (not `SetHandler`).
+**Why:** Stable 2.x not yet shipped. Beta5 API differs significantly from beta4.
+
+**21. db/ directory as schema source of truth**
+**By:** Gilfoyle (Backend Developer)
+**What:** `db/schema.sql` is the canonical DDL, not EF Core migrations. Raw SQL is human-readable and directly applicable to PostgreSQL.
+**Why:** Useful for DBA review, CI/CD, and AI role/view setup without .NET dependency.
+
+**22. Manual seed for now, Aspire automation deferred**
+**By:** Gilfoyle (Backend Developer)
+**What:** AppHost has a TODO for future Aspire seed automation. Current approach is manual CLI invocation.
+**Why:** Aspire doesn't natively support "run to completion" project references. Custom lifecycle hooks add unneeded complexity.
+
+### Bug Fix (Jared)
+
+**23. MySqlDumpParser VALUES position fix**
+**By:** Jared (Tester)
+**What:** Fixed off-by-one bug in `ProcessInsertStatement` where `VALUES` keyword position was computed incorrectly, causing zero parsed rows.
+**Why:** Original code used `match.Index + match.Length - 6` which overshot due to `\s*` consuming trailing space in regex. Changed to `match.Groups[1].Index + match.Groups[1].Length` to search after captured table name.
