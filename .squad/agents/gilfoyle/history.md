@@ -125,3 +125,37 @@
 - **Auth:** .NET Identity with JWT (1h access / 30d refresh with rotation). Email/password ships Phase 1. Passkey table created, endpoints stubbed pending React Native feasibility.
 - **AI foundations (zero-cost):** `werace_ai_readonly` role SQL, 7 database views for common queries, schema docs via `COMMENT ON`, reserved `/api/v1/ai/*` namespace returning 501.
 - **Aspire config:** PostgreSQL + pgAdmin + Redis + RedisInsight, single database with schema separation.
+
+### 2026-02-26: E1 Project Scaffolding — Backend Implemented
+
+**What:** Created the .NET 10 backend with Aspire orchestration from scratch.
+
+**Architecture:**
+- `.NET 10.0.103` SDK, `Aspire 13.1.2` (NuGet-based, workload deprecated in .NET 10)
+- Solution at `src/api/WeRace.slnx` with three projects:
+  - `WeRace.AppHost` — Aspire orchestrator (PostgreSQL + Redis + API)
+  - `WeRace.ServiceDefaults` — OpenTelemetry, health checks, service discovery, HTTP resilience
+  - `WeRace.Api` — Minimal API with `AddNpgsqlDataSource("werace")` and `AddRedisClient("redis")`
+- AppHost uses `WaitFor()` to ensure dependencies are ready before API starts
+- Health endpoints at `/health` and `/alive` (via ServiceDefaults, dev-only for now)
+- Aspire component packages auto-register health checks for PostgreSQL and Redis
+
+**Key Files:**
+- `src/api/WeRace.AppHost/AppHost.cs` — Aspire orchestration entry point
+- `src/api/WeRace.Api/Program.cs` — Minimal API setup
+- `src/api/WeRace.ServiceDefaults/Extensions.cs` — Shared Aspire defaults
+- `README.md` — Local dev setup instructions
+
+**Patterns:**
+- Aspire templates installed via `dotnet new install Aspire.ProjectTemplates` (NuGet-based in .NET 10)
+- Solution uses `.slnx` format (new default in .NET 10)
+- `dotnet run --project src/api/WeRace.AppHost` starts everything
+
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Dinesh (Frontend):** Expo SDK 55 app created at `src/app/`. 5-tab navigation (Home, Seasons, Drivers, Constructors, Settings). Theme system with AsyncStorage persistence. No backend dependency yet — will use mock data until API endpoints land.
+
+**Jared (Testing):** Test project at `tests/WeRace.Api.Tests/` added to solution. xUnit + FluentAssertions + WebApplicationFactory. Health check integration test commented out, waiting for you to uncomment the `WeRace.Api` project reference. Run `dotnet test tests/WeRace.Api.Tests/` to verify.
+
+**PR #8** opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
+

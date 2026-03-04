@@ -62,3 +62,12 @@
 - **PRD-REVIEW updated:** Q18 and Q1 marked as ✅ RESOLVED with blockquotes. Recommendations #3 and #4 marked as ✅ RESOLVED with strikethrough.
 - **decisions.md updated:** Q18 and Q1 blockers marked as ✅ RESOLVED with full resolution details. Feature Prioritization updated to two-phase approach.
 - **Next step:** Phase 1 sprint planning begins. The team has a clear, scoped, de-risked MVP target.
+
+### 2026-02-26 — E1 Project Scaffolding Complete
+
+- **Status:** ✅ Sprint 1 E1 scaffolding delivered by all 3 agents. PR #8 opened against `main` (closes #1).
+- **Backend:** .NET 10 Minimal API + Aspire (AppHost, ServiceDefaults, Api) with PostgreSQL and Redis.
+- **Frontend:** Expo SDK 55 app, React Native Paper MD3, 5-tab navigation, dark/light theme.
+- **Testing:** xUnit + FluentAssertions + WebApplicationFactory, Jest scaffold, `docs/TESTING.md`. 1/1 tests pass.
+- **Build status:** 0 warnings, 0 errors across full solution.
+- **15 E1 decisions merged** into `.squad/decisions.md` (4 backend, 5 frontend, 6 testing).

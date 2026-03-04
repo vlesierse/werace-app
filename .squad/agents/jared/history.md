@@ -108,3 +108,40 @@
 - Q3: Sprint races → separate `sprint_results` table (Jolpica-aligned)
 - Q4: Qualifying → separate `qualifying` table with Q1/Q2/Q3 columns
 - Q5: Pit stops → included in Phase 1 (`pit_stops` table, `GET /races/{id}/pit-stops`)
+
+### 2026-02-26: Sprint 1 — Test Infrastructure Scaffolding Complete
+
+**Status:** ✅ Test infrastructure created and verified. Placeholder tests pass.
+
+**Backend test project:** `tests/WeRace.Api.Tests/`
+- xUnit + FluentAssertions + coverlet + Microsoft.AspNetCore.Mvc.Testing
+- Targeting net10.0 (matches .NET SDK 10.0.103)
+- `HealthCheckTests.cs` — placeholder passes, real health check test commented out (waiting for API project)
+- `WeRace.Api` project reference commented out — Gilfoyle needs to uncomment when API project exists
+- Build: ✅ 0 warnings, 0 errors. Tests: ✅ 1/1 passed.
+
+**Frontend test file:** `src/app/__tests__/App.test.tsx`
+- Jest placeholder test (Expo comes with Jest pre-configured)
+- Real App render test commented out — waiting for Dinesh to create the App component
+
+**Documentation:** `docs/TESTING.md`
+- Full test strategy: pyramid, commands, coverage targets (≥80% floor), naming conventions
+- Test data strategy: real F1 data fixtures, TestContainers for integration tests
+
+**Key file paths:**
+- `tests/WeRace.Api.Tests/WeRace.Api.Tests.csproj` — backend test project
+- `tests/WeRace.Api.Tests/HealthCheckTests.cs` — health check integration test (scaffolded)
+- `tests/WeRace.Api.Tests/GlobalUsings.cs` — shared usings (xUnit + FluentAssertions)
+- `src/app/__tests__/App.test.tsx` — frontend render test (scaffolded)
+- `docs/TESTING.md` — test strategy document
+
+**Decision:** Test projects at `tests/` not `src/api/` — follows TECHNICAL-FOUNDATION.md solution structure.
+**Decision:** Gilfoyle must add test project to solution: `dotnet sln add tests/WeRace.Api.Tests/`
+
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Gilfoyle (Backend):** Backend created at `src/api/` with 3 projects (AppHost, ServiceDefaults, Api). Health endpoints at `/health` and `/alive`. Test project reference to `WeRace.Api` now active — health check integration test ready to uncomment. Solution builds 0 warnings, 0 errors.
+
+**Dinesh (Frontend):** Expo app at `src/app/` with 5 screens. Jest placeholder passes. Real render test in `__tests__/App.test.tsx` ready to uncomment.
+
+**Post-work:** Test project wired into solution. 1/1 tests pass. PR #8 opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.

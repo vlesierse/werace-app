@@ -135,3 +135,37 @@
 - Blocked on Gilfoyle for live API data (mitigated by mock data)
 - API contracts from Richard in S1 define your screen data shapes
 - Monica provides acceptance criteria for empty/error states (Q7, Q9) by S3
+
+### 2026-02-26: E1 Project Scaffolding — Frontend Complete
+
+**What was done:**
+- Initialized Expo SDK 55 (React 19, React Native 0.83) app under `src/app/`
+- Installed and configured React Native Paper v5 (Material Design 3) with F1-inspired color palette
+- Set up React Navigation v7 bottom tabs with 5 screens: Home, Seasons, Drivers, Constructors, Settings
+- Built theme system with light/dark/system modes, AsyncStorage persistence, and manual toggle
+- Bottom navigation uses Paper's `BottomNavigation.Bar` as custom tab bar — full MD3 styling including active indicators
+- TypeScript strict mode, zero compilation errors
+
+**Key architectural decisions:**
+1. **Separate Paper + Navigation themes:** PaperProvider gets the Paper theme, NavigationContainer gets its own adapted navigation theme. Merging them into a single object caused font type conflicts. `adaptNavigationTheme()` bridges Paper colors into Navigation's color slots.
+2. **ThemeContext pattern:** A single `useThemeProvider()` hook manages state, persistence, and system detection. Screens consume via `useAppTheme()`. This keeps the root `App.tsx` thin.
+3. **Tab config as data:** Navigation tabs are defined as a typed array and mapped to `Tab.Screen` components — easy to add/remove tabs without touching navigation logic.
+4. **Icons via `@expo/vector-icons`:** Using `MaterialCommunityIcons` from `@expo/vector-icons` rather than raw `react-native-vector-icons` for Expo compatibility.
+
+**Key file paths:**
+- `src/app/App.tsx` — Root component (providers: SafeArea → ThemeContext → PaperProvider → NavigationContainer)
+- `src/app/src/theme/index.ts` — Theme definitions, context, persistence hook
+- `src/app/src/navigation/AppNavigator.tsx` — Bottom tab navigator with Paper integration
+- `src/app/src/screens/` — Five placeholder screens (Settings has theme toggle)
+- `src/app/app.json` — Expo config (renamed to WeRace, `userInterfaceStyle: automatic`)
+
+**Stack versions:** Expo 55, React 19.2, React Native 0.83.2, Paper 5.15, Navigation 7.1, AsyncStorage 3.0
+
+### 2026-02-26: E1 Scaffolding Complete — Cross-Agent Updates
+
+**Gilfoyle (Backend):** .NET 10 backend created at `src/api/`. Three projects: AppHost (Aspire orchestrator with PostgreSQL + Redis), ServiceDefaults, Api. Solution uses `.slnx` format. Start everything with `dotnet run --project src/api/WeRace.AppHost`.
+
+**Jared (Testing):** Jest placeholder at `src/app/__tests__/App.test.tsx`. Real render test commented out, waiting for your App component. Test naming convention: `it('should [behavior] when [condition]')`. See `docs/TESTING.md`.
+
+**PR #8** opened against `main` (closes #1). Branch: `squad/1-project-scaffolding`.
+

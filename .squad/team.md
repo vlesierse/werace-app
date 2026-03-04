@@ -21,6 +21,12 @@
 | Ralph | Work Monitor | — | 🔄 Monitor |
 | @copilot | Coding Agent | `copilot-instructions.md` | 🤖 Autonomous |
 
+## Issue Source
+
+- **Repository:** vlesierse/werace-app
+- **Connected:** 2026-02-26
+- **Filters:** All open issues with `squad` label
+
 ## Project Context
 
 - **Owner:** Vincent Lesierse
@@ -30,7 +36,7 @@
 
 ## Coding Agent
 
-<!-- copilot-auto-assign: true -->
+<!-- copilot-auto-assign: false -->
 
 ### Capabilities
 

@@ -1,0 +1,29 @@
+{
+  "name": "WeRace App",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "10.0"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-dotnet-runtime",
+        "ms-azuretools.vscode-aspire",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "forwardPorts": [5150, 7274, 15049, 17108],
+  "postCreateCommand": "dotnet restore && dotnet restore src/api/WeRace.slnx && cd src/app && npm install",
+  "remoteUser": "vscode"
+}

@@ -323,3 +323,76 @@ Free with ads, freemium, or paid upfront
 | 7 | Acceptable gap between Phase 1 and Phase 2? | 2-3 weeks recommended |
 
 **Full proposals:** `.squad/decisions/inbox/monica-blocker-proposals.md`
+
+## E1 Project Scaffolding Decisions (2026-02-26)
+
+### Backend Scaffolding (Gilfoyle)
+
+**1. Aspire 13.1.2 via NuGet (not workload)**
+**By:** Gilfoyle (Backend Developer)
+**What:** Aspire consumed as NuGet packages. Templates installed via `dotnet new install Aspire.ProjectTemplates`.
+**Why:** The Aspire workload is deprecated in .NET 10. All functionality comes from `Aspire.Hosting.*` and `Aspire.*` NuGet packages.
+
+**2. Solution format: `.slnx`**
+**By:** Gilfoyle (Backend Developer)
+**What:** Solution file is `WeRace.slnx`, not `.sln`.
+**Why:** `.slnx` is the new default format in .NET 10. Simpler XML, smaller diff surface.
+
+**3. AppHost `WaitFor()` dependency wiring**
+**By:** Gilfoyle (Backend Developer)
+**What:** AppHost uses `WaitFor()` for PostgreSQL and Redis before starting the API.
+**Why:** Prevents API from starting before dependencies are healthy. Aspire handles container lifecycle.
+
+**4. Health checks auto-registered by Aspire components**
+**By:** Gilfoyle (Backend Developer)
+**What:** `/health` and `/alive` endpoints provided by ServiceDefaults. Aspire component packages auto-register health checks.
+**Why:** Zero additional health check code. PostgreSQL and Redis connectivity verified automatically.
+
+### Frontend Scaffolding (Dinesh)
+
+**5. Expo SDK 55 managed workflow**
+**By:** Dinesh (Frontend Developer)
+**What:** Expo managed workflow with SDK 55, React 19.2, React Native 0.83.2.
+**Why:** Latest stable Expo SDK. Managed workflow keeps the build pipeline simple.
+
+**6. Separate Paper and Navigation themes**
+**By:** Dinesh (Frontend Developer)
+**What:** PaperProvider and NavigationContainer receive separate theme objects. `adaptNavigationTheme()` bridges colors.
+**Why:** Merging Paper (MD3Typescale) and Navigation (FontStyle) fonts into one object causes TypeScript type conflicts.
+
+**7. Paper `BottomNavigation.Bar` as custom tab bar**
+**By:** Dinesh (Frontend Developer)
+**What:** React Navigation's `createBottomTabNavigator` uses Paper's `BottomNavigation.Bar` via the `tabBar` prop.
+**Why:** Full MD3 styling (active indicators, ripple, theming) while keeping React Navigation routing. Recommended by Paper docs.
+
+**8. ThemeContext with AsyncStorage persistence**
+**By:** Dinesh (Frontend Developer)
+**What:** Theme preference (system/light/dark) stored in AsyncStorage, exposed via React Context.
+**Why:** Users expect theme choice to survive app restarts. System-default is the fallback.
+
+**9. `@expo/vector-icons` for icons**
+**By:** Dinesh (Frontend Developer)
+**What:** Using `MaterialCommunityIcons` from `@expo/vector-icons`.
+**Why:** Bundled with Expo (no native linking), matches Paper's design language.
+
+### Test Infrastructure (Jared)
+
+**10. Test project at `tests/` (not `src/api/`)**
+**By:** Jared (Tester)
+**What:** Tests live at `tests/WeRace.Api.Tests/`, matching `docs/TECHNICAL-FOUNDATION.md` solution structure.
+**Why:** Keeps source and test code separated at the top level.
+
+**11. WebApplicationFactory for backend integration tests**
+**By:** Jared (Tester)
+**What:** Backend tests use `WebApplicationFactory<Program>` for in-memory HTTP integration testing.
+**Why:** Real HTTP testing without external infrastructure.
+
+**12. xUnit + FluentAssertions + coverlet**
+**By:** Jared (Tester)
+**What:** Standard .NET test stack with readable assertions and cross-platform coverage.
+**Why:** Industry standard. FluentAssertions readable syntax. Coverlet for CI coverage reports.
+
+**13. Test naming conventions**
+**By:** Jared (Tester)
+**What:** Backend: `MethodName_StateUnderTest_ExpectedBehavior`. Frontend: `it('should [behavior] when [condition]')`.
+**Why:** Consistent naming across team makes tests self-documenting.
