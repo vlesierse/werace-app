@@ -23,3 +23,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Run();
+
+// Make Program accessible to WebApplicationFactory in integration tests
+public partial class Program { }
