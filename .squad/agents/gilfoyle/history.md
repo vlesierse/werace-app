@@ -214,3 +214,45 @@
 
 - `System.CommandLine 2.0.0-beta5` API changed significantly from beta4: `Option<T>(name)` constructor (no `description` param), `Required` property (not `IsRequired`), `SetAction(parseResult => ...)` (not `SetHandler`), `CommandLineConfiguration.InvokeAsync(args)` (not `command.InvokeAsync`).
 - Npgsql version must match EF Core transitive dependency (10.0.0), not lower.
+
+### 2026-03-04: Jared rewrote DataImport tests for CSV (cross-agent)
+
+**What:** Jared deleted `MySqlDumpParserTests.cs`, created `CsvDataParserTests.cs` (18 tests), and rewrote `SchemaMapperTests.cs` (17 tests) to match the new CSV import pipeline.
+
+**Test contract defined:**
+- `CsvDataParser.ParseDirectory(string)` → dictionary with `.Headers` / `.Rows`
+- `SchemaMapper.MapTableName(string)` maps CSV table names to WeRace table names
+- `SchemaMapper.GetColumnMapping(string)` returns ordered column mappings with `.CsvColumn` / `.WeRaceColumn`
+- `SchemaMapper.NormalizeValue(string)` treats empty strings, `"NULL"`, `"\N"` as null
+
+All 127 tests pass.
+
+### 2026-03-04: DataImport refactored from MySQL dump to CSV directory
+
+**What:** Jolpica provides CSV files, not MySQL dumps. Gutted the old MySQL parser and rebuilt the entire import pipeline for CSV.
+
+**Deleted:**
+- `Importers/MySqlDumpParser.cs` — MySQL INSERT parser. Dead code.
+- `Importers/JolpicaDumpImporter.cs` — Replaced by `JolpicaCsvImporter.cs`.
+- `Importers/SchemaMapper.cs` — Complete rewrite for CSV column names and Jolpica normalized data model.
+- `tests/.../MySqlDumpParserTests.cs`, `tests/.../SchemaMapperTests.cs` — Replaced.
+
+**Created:**
+- `Importers/CsvDataParser.cs` — Reads `formula_one_*.csv` files from a directory using CsvHelper 33.1.0. Returns `Dictionary<string, CsvTable>` keyed by table name (prefix stripped).
+- `Importers/SchemaMapper.cs` — Complete rewrite. The Jolpica CSV data model is fundamentally different from Ergast: normalized through `session → round`, `sessionentry → roundentry → teamdriver` chains. The mapper resolves these FK chains to produce the 14 denormalized WeRace tables. Key mappings: season→seasons, circuit→circuits, driver→drivers, team→constructors, round+session→races, sessionentry(R)→results, sessionentry(Q*)→qualifying, sessionentry(SR)→sprint_results, driverchampionship→driver_standings, teamchampionship→constructor_standings, lap→lap_times, pitstop→pit_stops. Status table derived from distinct sessionentry.detail values.
+- `Importers/JolpicaCsvImporter.cs` — Orchestrator accepting directory path. Same COPY/upsert/sequence-reset/validation pipeline as before.
+
+**Architecture decisions:**
+- Session types discovered: FP1, FP2, FP3, Q1, Q2, Q3, QA, QB, QO, R, SQ1, SQ2, SQ3, SR. Qualifying phases (Q1/Q2/Q3) aggregate into one qualifying row per driver per race. Legacy types (QA/QB/QO) map to q1.
+- Status table IDs are deterministic (sorted alphabetically) for delta mode stability.
+- Cancelled rounds and sessions are skipped.
+- `constructor_results` has no CSV source — skipped with TODO.
+- Fastest lap resolution from lap data marked as TODO (needs cross-reference with `is_entry_fastest_lap` flag).
+
+**Key files:**
+- `src/api/WeRace.DataImport/Importers/CsvDataParser.cs`
+- `src/api/WeRace.DataImport/Importers/SchemaMapper.cs`
+- `src/api/WeRace.DataImport/Importers/JolpicaCsvImporter.cs`
+- `src/api/WeRace.DataImport/Program.cs` — `--source` now takes directory path (`DirectoryInfo`)
+- `db/seed/README.md` — Updated for CSV workflow
+- `tests/.../CsvDataParserTests.cs`, `tests/.../SchemaMapperTests.cs` — 25 tests, all passing. 127 total tests pass.

@@ -454,3 +454,39 @@ Free with ads, freemium, or paid upfront
 **By:** Jared (Tester)
 **What:** Fixed off-by-one bug in `ProcessInsertStatement` where `VALUES` keyword position was computed incorrectly, causing zero parsed rows.
 **Why:** Original code used `match.Index + match.Length - 6` which overshot due to `\s*` consuming trailing space in regex. Changed to `match.Groups[1].Index + match.Groups[1].Length` to search after captured table name.
+
+## CSV Import Refactor Decisions (2026-03-04)
+
+### CSV-Based Import Pipeline (Gilfoyle)
+
+**24. CsvHelper for CSV parsing**
+**By:** Gilfoyle (Backend Developer)
+**What:** Replaced `MySqlDumpParser` with `CsvDataParser` using CsvHelper 33.1.0. Import pipeline reads a directory of `formula_one_*.csv` files.
+**Why:** Jolpica provides CSV files, not MySQL dumps. CsvHelper handles quoted fields, commas in values, and edge cases robustly.
+
+**25. SchemaMapper rewritten for Jolpica normalized CSV model**
+**By:** Gilfoyle (Backend Developer)
+**What:** Complete SchemaMapper rewrite. Jolpica CSV data model uses normalized FK chains (`sessionentry → roundentry → teamdriver`) instead of Ergast's flat structure. Mapper resolves these into the 14 denormalized WeRace tables.
+**Why:** Jolpica CSV column names and data model are fundamentally different from Ergast — not a column rename but a different relational structure.
+
+**26. Status table derived at import time**
+**By:** Gilfoyle (Backend Developer)
+**What:** Status IDs generated from sorted distinct `sessionentry.detail` values (alphabetical for deterministic IDs).
+**Why:** No dedicated status CSV file. Deterministic ordering supports delta mode stability.
+
+**27. Session type routing for qualifying aggregation**
+**By:** Gilfoyle (Backend Developer)
+**What:** R → results, Q1/Q2/Q3/QA/QB/QO → qualifying (aggregated per driver per race), SR → sprint_results, FP/SQ → skipped.
+**Why:** Qualifying phases must aggregate into one row per driver per race. Legacy formats (QA/QB/QO) store time in q1 only.
+
+**28. CLI `--source` changed to directory input**
+**By:** Gilfoyle (Backend Developer)
+**What:** `--source` option changed from `FileInfo` (single .sql) to `DirectoryInfo` (CSV directory). `JolpicaDumpImporter` renamed to `JolpicaCsvImporter`.
+**Why:** Input is now a directory of CSV files, not a single dump file.
+
+### CSV Test API Surface Contract (Jared)
+
+**29. Test contract for CSV import classes**
+**By:** Jared (Tester)
+**What:** Tests define the expected API surface: `CsvDataParser.ParseDirectory()` returns dictionary with `.Headers`/`.Rows`, `SchemaMapper.MapTableName()` maps CSV to WeRace names, `SchemaMapper.GetColumnMapping()` returns ordered column mappings, `SchemaMapper.NormalizeValue()` treats empty/NULL/\\N as null.
+**Why:** Tests serve as specification for the implementation contract. 18 CsvDataParser tests + 17 SchemaMapper tests cover the full CSV pipeline surface.

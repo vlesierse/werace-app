@@ -154,6 +154,35 @@
 
 - `tests/WeRace.Api.Tests/DataImport/MySqlDumpParserTests.cs` — 15 tests: INSERT parsing, backtick-quoted names, escape handling (backslash, double-quote), NULL values, numerics, multi-table dumps, non-INSERT skipping, empty files, commas/parentheses in strings
 - `tests/WeRace.Api.Tests/DataImport/SchemaMapperTests.cs` — 30 tests: camelCase-to-snake_case table mapping, column name conversion, FK resolution (races.year → season_id), pass-through tables, NormalizeValue handling
+
+### 2026-03-04: DataImport Tests Rewritten for CSV Migration
+
+**Status:** ✅ Test files rewritten. Blocked on Gilfoyle's implementation code (won't compile until `CsvDataParser.cs` and updated `SchemaMapper.cs` land).
+
+**What changed:**
+- **DELETED** `MySqlDumpParserTests.cs` (MySQL dump parser being removed)
+- **CREATED** `CsvDataParserTests.cs` — 18 tests covering: table name extraction (strip `formula_one_` prefix), header parsing, data rows, empty fields, quoted fields (commas, newlines, escaped quotes), header-only CSVs, empty directories, missing directories, non-CSV file filtering, real-world format tests for season/circuit/driver/round/team CSVs
+- **REWRITTEN** `SchemaMapperTests.cs` — 17 tests covering: CSV table name mapping (season→seasons, circuit→circuits, driver→drivers, round→races, team→constructors), case-insensitive mapping, column mapping for all 5 core tables (CSV column names → WeRace DB column names), unknown table handling, NormalizeValue (empty string→null, NULL→null, \\N→null, regular values pass through)
+
+**Expected API surface for Gilfoyle:**
+- `CsvDataParser.ParseDirectory(string directoryPath)` → `Dictionary<string, T>` where T has `.Headers` (string[]) and `.Rows` (List<string[]>)
+- `SchemaMapper.MapTableName(string csvTable)` — maps CSV table names (without formula_one_ prefix) to WeRace table names
+- `SchemaMapper.GetColumnMapping(string csvTable)` → array of objects with `.CsvColumn` and `.WeRaceColumn` properties
+- `SchemaMapper.NormalizeValue(string value)` — kept, updated to treat empty strings as null
+
+**Build errors (31 total):** All expected — `CsvDataParser` class doesn't exist yet (16), `GetColumnMapping` method doesn't exist yet (11), old methods removed (4). Zero syntax errors in test code.
+
+### 2026-03-04: Gilfoyle completed CSV refactor — tests green (cross-agent)
+
+**What:** Gilfoyle implemented the CSV import pipeline matching Jared's test contract. All build errors resolved. 127 tests pass.
+
+**Key changes by Gilfoyle:**
+- Deleted `MySqlDumpParser.cs`, created `CsvDataParser.cs` with CsvHelper 33.1.0
+- Rewrote `SchemaMapper.cs` for Jolpica normalized FK chains (sessionentry → roundentry → teamdriver)
+- Created `JolpicaCsvImporter.cs` replacing `JolpicaDumpImporter.cs`
+- `Program.cs` `--source` now takes `DirectoryInfo` instead of `FileInfo`
+- Status table derived at import time from distinct `sessionentry.detail` values
+- Session routing: R → results, Q* → qualifying, SR → sprint_results, FP/SQ → skipped
 - `tests/WeRace.Api.Tests/Domain/EntityTests.cs` — 30 tests: property existence, types, nullability (nullable vs non-nullable), navigation properties, collection initialization for Season, Race, Driver, Result, Constructor, Circuit, Status, PitStop, LapTime, Qualifying, SprintResult, DriverStanding, ConstructorStanding, ConstructorResult
 - `tests/WeRace.Api.Tests/Infrastructure/DbContextTests.cs` — 96 tests: 14 DbSets registered, snake_case table names, composite PKs (PitStop, LapTime), single-column PKs, FK relationships (23 foreign keys verified), index coverage (15 indexed columns), unique indexes (year, driver_ref, circuit_ref, season_id+round), all column names match snake_case pattern
 

@@ -1,11 +1,11 @@
 using System.CommandLine;
 using WeRace.DataImport.Importers;
 
-var sourceOption = new Option<FileInfo>("--source") { Description = "Path to the Jolpica MySQL dump file (.sql)", Required = true };
+var sourceOption = new Option<DirectoryInfo>("--source") { Description = "Path to the directory containing Jolpica CSV files (formula_one_*.csv)", Required = true };
 var connectionOption = new Option<string>("--connection") { Description = "PostgreSQL connection string", Required = true };
 var modeOption = new Option<ImportMode>("--mode") { Description = "Import mode: full (truncate + reload) or delta (upsert)", DefaultValueFactory = _ => ImportMode.Full };
 
-var rootCommand = new RootCommand("WeRace data import tool — loads Jolpica F1 dump into PostgreSQL")
+var rootCommand = new RootCommand("WeRace data import tool — loads Jolpica F1 CSV data into PostgreSQL")
 {
     sourceOption,
     connectionOption,
@@ -20,7 +20,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
 
     if (!source.Exists)
     {
-        Console.Error.WriteLine($"Source file not found: {source.FullName}");
+        Console.Error.WriteLine($"Source directory not found: {source.FullName}");
         return;
     }
 
@@ -29,7 +29,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     Console.WriteLine($"  Mode:   {mode}");
     Console.WriteLine();
 
-    var importer = new JolpicaDumpImporter(connection);
+    var importer = new JolpicaCsvImporter(connection);
     await importer.ImportAsync(source.FullName, mode);
 });
 

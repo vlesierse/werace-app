@@ -13,10 +13,10 @@ public enum ImportMode
 }
 
 /// <summary>
-/// Orchestrates the full Jolpica dump → PostgreSQL import pipeline.
-/// Parses the MySQL dump, maps to WeRace schema, bulk loads via COPY, and validates.
+/// Orchestrates the Jolpica CSV → PostgreSQL import pipeline.
+/// Parses the CSV directory, maps to WeRace schema, bulk loads via COPY, and validates.
 /// </summary>
-public class JolpicaDumpImporter(string connectionString)
+public class JolpicaCsvImporter(string connectionString)
 {
     /// <summary>
     /// Table load order respecting FK dependencies.
@@ -45,27 +45,31 @@ public class JolpicaDumpImporter(string connectionString)
     /// </summary>
     private static readonly string[] TruncateOrder = LoadOrder.Reverse().ToArray();
 
-    public async Task ImportAsync(string dumpFilePath, ImportMode mode)
+    public async Task ImportAsync(string csvDirectoryPath, ImportMode mode)
     {
         var totalSw = Stopwatch.StartNew();
 
-        // Step 1: Parse MySQL dump
-        Console.WriteLine("Parsing MySQL dump...");
+        // Step 1: Parse CSV directory
+        Console.WriteLine("Parsing CSV files...");
         var parseSw = Stopwatch.StartNew();
-        var jolpicaData = MySqlDumpParser.Parse(dumpFilePath);
+        var csvData = CsvDataParser.Parse(csvDirectoryPath);
         parseSw.Stop();
 
-        Console.WriteLine($"  Parsed {jolpicaData.Count} tables in {parseSw.Elapsed.TotalSeconds:F1}s");
-        foreach (var (table, rows) in jolpicaData.OrderBy(kv => kv.Key))
+        Console.WriteLine($"  Parsed {csvData.Count} CSV files in {parseSw.Elapsed.TotalSeconds:F1}s");
+        foreach (var (table, data) in csvData.OrderBy(kv => kv.Key))
         {
-            Console.WriteLine($"    {table}: {rows.Count:N0} rows");
+            Console.WriteLine($"    {table}: {data.Rows.Count:N0} rows ({data.Headers.Length} columns)");
         }
         Console.WriteLine();
 
         // Step 2: Map to WeRace schema
         Console.WriteLine("Mapping to WeRace schema...");
-        var mapped = SchemaMapper.MapAll(jolpicaData);
-        Console.WriteLine($"  Mapped {mapped.Count} tables");
+        var mapped = SchemaMapper.MapAll(csvData);
+        Console.WriteLine($"  Mapped to {mapped.Count} target tables");
+        foreach (var (table, rows) in mapped.OrderBy(kv => kv.Key))
+        {
+            Console.WriteLine($"    {table}: {rows.Count:N0} rows");
+        }
         Console.WriteLine();
 
         // Step 3: Load into PostgreSQL
@@ -198,7 +202,6 @@ public class JolpicaDumpImporter(string connectionString)
     {
         await using var conn = await dataSource.OpenConnectionAsync();
 
-        // Determine the primary key column(s) for this table
         var pkColumns = GetPrimaryKeyColumns(table);
 
         // Create temp table
@@ -235,7 +238,6 @@ public class JolpicaDumpImporter(string connectionString)
         }
 
         // Upsert from temp into main
-        var pkCondition = string.Join(" AND ", pkColumns.Select(pk => $"{table}.{pk} = {tempTable}.{pk}"));
         var updateSet = string.Join(", ", columns.Where(c => !pkColumns.Contains(c)).Select(c => $"{c} = EXCLUDED.{c}"));
         var conflict = string.Join(", ", pkColumns);
 
@@ -267,11 +269,10 @@ public class JolpicaDumpImporter(string connectionString)
     }
 
     /// <summary>
-    /// Resets SERIAL sequences to max(id) + 1 after COPY (COPY doesn't advance sequences).
+    /// Resets SERIAL sequences to max(id) + 1 after COPY.
     /// </summary>
     private static async Task ResetSequencesAsync(NpgsqlDataSource dataSource)
     {
-        // Tables with SERIAL primary keys
         string[] tablesWithSerial =
         [
             "seasons", "circuits", "races", "drivers", "constructors", "status",
